@@ -24,8 +24,12 @@ class DeploymentTests(unittest.TestCase):
         self.addCleanup(quiet.__exit__, None, None, None)
 
     def test_profiles_and_agents_have_same_instructions_without_permission_overrides(self):
-        self.assertEqual(len(self.outputs), 6)
-        for role in deploy.ROLES:
+        roles = {"lead", "scoper", "architect", "developer", "tester", "validator", "reviewer"}
+        self.assertEqual(set(self.outputs), {
+            path for role in roles
+            for path in (f"agents/{role}.toml", f"agentic-{role}.config.toml")
+        })
+        for role in roles:
             agent = tomllib.loads(self.outputs[f"agents/{role}.toml"])
             profile = tomllib.loads(self.outputs[f"agentic-{role}.config.toml"])
             self.assertEqual(agent["name"], role)

@@ -9,6 +9,10 @@ the first target; Claude support can reuse the role instructions later.
 | --- | --- |
 | Lead | Own the task, delegate work, retain decisions and approvals, route findings. |
 | Scoper | Work with the user on the problem and acceptance criteria; return a reviewed brief. |
+| Architect | Develop the design with the user; return an independently reviewed, approved design. |
+| Developer | Implement the approved design, run existing checks, and report reviewed changes and design drift. |
+| Tester | Propose unit and integration tests; author, run and review them after plan approval. |
+| Validator | Exercise acceptance scenarios on a throwaway instance and return reviewed evidence. |
 | Reviewer | Independently review the assigned artifact against its requirements and stage. |
 
 Role instructions live in `roles/`. `common.md` is included in every role.
@@ -27,10 +31,10 @@ python3 scripts/deploy.py
 python3 scripts/deploy.py --check
 ```
 
-Deployment generates three named agents in `~/.codex/agents/` and three profiles:
-`agentic-lead.config.toml`, `agentic-scoper.config.toml`, and
-`agentic-reviewer.config.toml`. `CODEX_HOME` is respected; `--codex-home PATH`
-selects an explicit destination. Edit the source files here and redeploy.
+Deployment generates seven named agents in `~/.codex/agents/` and seven profiles
+named `agentic-<role>.config.toml`, one for each role above. `CODEX_HOME` is respected;
+`--codex-home PATH` selects an explicit destination. Edit the source files here and
+redeploy.
 
 Existing files without this repository's generated marker cause deployment to
 stop before writing anything. Use `--replace` to replace those exact files after
@@ -54,14 +58,17 @@ agent name so Scoper can message its reviewed brief and decisions back to Lead.
 A reviewed brief does not authorize implementation; existing scoped work can skip
 repeated scoping.
 
-Lead delegates detailed work to native non-interactive subagents and keeps concise
-results for coordination. Use `/subagents` to inspect those threads; use Herdr tabs
-for direct user conversations. Scoper and Reviewer profiles also support standalone
-sessions, with an explicit user handoff when no caller address is available.
+Lead opens interactive stage owners in separate Herdr tabs using their
+`agentic-<role>` profiles. Research, reviews and documentation updates use native
+non-interactive subagents. Use `/subagents` to inspect those threads; use Herdr tabs
+for direct user conversations. Native reviews use the `reviewer` role; standalone
+review sessions use the `agentic-reviewer` profile. All role profiles also support
+standalone sessions, with an explicit user handoff when no caller address is available.
 
-The Lead follows scoping, architecting, developing, reviewing and validating,
-delegating to ordinary workers where no custom role exists. It owns approvals,
-the gate for authoring new unit/integration tests, and keeping docs current.
+The Lead follows scoping, architecting, developing, unit and integration testing,
+validating and documenting. It tracks approvals and keeps docs current. Developer
+may run existing checks; Tester authors new unit and integration tests after
+initial code approval and user approval of the proposed test plan.
 See [the Lead role](roles/lead.md) for the workflow.
 
 Profiles apply to CLI sessions selected with `--profile`; they do not automatically
@@ -83,7 +90,7 @@ reports whether the installed files exactly match the current sources. These che
 do not prove model behavior: try direct scoping in its Herdr tab, verify the return
 message reaches Lead, and confirm no implementation starts without approval.
 
-To remove the setup, delete only the six generated role/profile files after checking
+To remove the setup, delete only the fourteen generated role/profile files after checking
 their markers, and restore any desired backups. Nothing is added to shell startup
 files or `config.toml`. The old `Code/agents` examples are not deployment inputs;
 old project review hooks, if installed elsewhere, need separate removal.

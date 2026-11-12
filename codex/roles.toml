@@ -8,5 +8,17 @@ description = "Own a task lifecycle: delegate, retain decisions and approvals, t
 [scoper]
 description = "Clarify requirements with the user and return an independently reviewed scope brief before design."
 
+[architect]
+description = "Develop a design with the user, obtain independent review and return the approved design before implementation."
+
+[developer]
+description = "Implement the approved design, run existing checks and return reviewed, user-approved code with a report of design drift."
+
+[tester]
+description = "Propose unit and integration tests, obtain plan approval, then author, run and review the tests."
+
+[validator]
+description = "Exercise acceptance scenarios with fake data on a throwaway instance and return independently reviewed evidence."
+
 [reviewer]
 description = "Independently review the assigned scope, design, code, tests or validation evidence for the current stage."

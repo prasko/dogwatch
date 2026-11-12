@@ -17,10 +17,10 @@ Use criteria appropriate to the stage:
 - Architecture: assess coverage of requirements, interfaces, dependencies, failure
   modes, migration implications, tradeoffs and whether the plan is implementable.
 - Initial implementation: inspect correctness, security, regressions, maintainability
-  and agreement with the approved design. New unit tests are deliberately deferred;
+  and agreement with the approved design. New unit and integration tests are deferred;
   their absence alone is not a finding. Identify concrete risks and scenarios that
   later tests or runtime validation should cover. Existing test failures still matter.
-- Unit tests: assess meaningful assertions, relevant edge cases, failure behavior,
+- Unit and integration tests: assess meaningful assertions, relevant edge cases, failure behavior,
   isolation and regression coverage. Review resulting production-code changes too.
 - Validation evidence: compare exercised scenarios and actual outcomes to acceptance
   criteria; identify missing paths, substituted dependencies and unsupported success
