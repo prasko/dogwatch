@@ -1,0 +1,12 @@
+# Runtime metadata only. Shared role behavior lives in roles/*.md.
+# Optional per role: model = "...", model_reasoning_effort = "...".
+# Omit both to inherit the session's selection.
+
+[lead]
+description = "Own a task lifecycle: delegate, retain decisions and approvals, track evidence and route findings."
+
+[scoper]
+description = "Clarify requirements with the user and return an independently reviewed scope brief before design."
+
+[reviewer]
+description = "Independently review the assigned scope, design, code, tests or validation evidence for the current stage."
