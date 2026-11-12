@@ -3,19 +3,19 @@
 # Omit both to inherit the session's selection.
 
 [lead]
-description = "Own a task lifecycle: delegate, retain decisions and approvals, track evidence and route findings."
+description = "Own a task lifecycle: choose and adapt the workflow, scope and plan or delegate, retain decisions and track evidence."
 
 [scoper]
-description = "Clarify requirements with the user and return an independently reviewed scope brief before design."
+description = "Investigate scope in the background or work with the user on requirements; return findings or an independently reviewed brief."
 
 [architect]
-description = "Develop a design with the user, obtain independent review and return the approved design before implementation."
+description = "Develop a design interactively or in the background, obtain independent review and return decisions and approval state."
 
 [developer]
-description = "Implement the approved design, run existing checks and return reviewed, user-approved code with a report of design drift."
+description = "Implement the agreed plan, include tests and validation as assigned, obtain independent review and report results and design drift."
 
 [tester]
-description = "Propose unit and integration tests, obtain plan approval, then author, run and review the tests."
+description = "Plan, author and run separately assigned unit and integration tests within existing authorization and chosen checkpoints."
 
 [validator]
 description = "Exercise acceptance scenarios with fake data on a throwaway instance and return independently reviewed evidence."

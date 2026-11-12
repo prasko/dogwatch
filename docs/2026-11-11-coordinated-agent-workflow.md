@@ -23,11 +23,12 @@ efforts until the task workflow proves useful. Success means:
 
 ## Overview
 
-Every task starts with the lead, which launches a separate interactive scoper. For a larger
-effort, the overall lead takes that coordinating role. The user and the scoper establish the
-problem, desired outcome, constraints, acceptance criteria and open questions, supported by
-background research workers. The scoper returns a reviewed brief and suggested direction to the
-lead, which uses it to commission architecture.
+Every task starts with the lead, which chooses the smallest useful workflow based on scope,
+uncertainty, risk and the need for user discussion. Clear small tasks can use background scoping
+with findings and a concise plan discussed in Lead. Unclear tasks can start with the same bounded
+investigation; the lead discusses findings and questions with the user and opens an interactive scoper if sustained
+discussion is useful. Substantial tasks needing dedicated scoping can start interactively at once.
+The lead revisits this choice as evidence develops, including during design, testing and validation.
 
 A task corresponds to one PR and normally occupies one worktree. Its lead owns progress from
 the initial request through scoping, design, implementation, testing, review and delivery. The
@@ -40,6 +41,47 @@ through that common parent. The user can interact directly with any interactive 
 then reports consequential decisions back through the tree.
 
 ### Small task flow
+
+Small tasks still involve scoping, planning, implementation and testing. A background Scoper can
+investigate scope, Lead can discuss the findings and agree a concise plan, and an interactive
+Developer can perform implementation and testing in the same conversation.
+Lead can also handle straightforward scoping directly. Developer obtains independent review,
+addresses findings and reports results to the lead. Relevant runtime validation can be included in
+that assignment or delegated separately. Non-interactive development is reserved for rare, tiny,
+well-defined changes such as a small configuration edit.
+
+```mermaid
+flowchart TB
+    U["User"] <--> L["Lead<br/>Discuss scope and agree plan<br/>Coordinate and report results"]
+    L <--> S["Background Scoper<br/>Investigation and findings"]
+    L <--> D["Interactive Developer<br/>Implement and test"]
+    U <--> D
+    D <--> R["Background Reviewer<br/>Code, tests and evidence"]
+    L -.-> V["Optional Validator<br/>Runtime scenarios and reviewed evidence"]
+    V -.-> L
+```
+
+The diagram shows conversations and handoffs; one conversation can cover several distinct steps.
+One agreed plan may authorize implementation, tests and relevant validation. Additional approval
+is needed for material changes to scope or design or checkpoints explicitly chosen with the user.
+Existing approvals carry forward across agent handoffs. A preliminary investigation returns
+evidence, assumptions and open questions; it need not produce a complete reviewed brief. If an
+interactive scoper is opened later, it receives those findings and decisions so work is not repeated.
+
+### Medium task flow
+
+A medium task can use a background Scoper initially, an interactive Architect to work through
+the design and an interactive Developer for implementation. Testing can be assigned to a
+non-interactive Tester once its direction is agreed, with background Validator work where runtime
+evidence is needed. Reviews and documentation updates stay in the background. Open an interactive
+Scoper, Tester or Validator when that step needs sustained discussion with the user.
+
+### Large task flow
+
+For a large task, dedicated Scoper, Architect, Developer, Tester and Validator conversations can
+all be interactive. The following shows that expanded workflow, including optional code-before-tests
+and test-plan approval checkpoints. Reviews and documentation updates stay in the background.
+Stages can still be combined or omitted, and a new stage or agent does not itself require approval.
 
 ```mermaid
 flowchart TB
@@ -71,65 +113,58 @@ flowchart TB
     end
 ```
 
-The numbered stages show the usual progression; the arrows show delegation and reporting back.
+The numbered stages show the expanded progression; the arrows show delegation and reporting back.
 Reviewer nodes are assignments of the same role, each reporting to its commissioning owner. The user
-starts with the lead, which launches the scoper, and can enter any interactive worker's conversation.
-The scoper has its own context, including for small tasks. Workers may use background workers for
-bounded research or review.
+starts with the lead and can enter an interactive specialist conversation where useful. Background
+workers send user questions through the lead. Workers can delegate bounded research or review.
 
-**1. Scope.** The lead receives the initial request and launches a separate interactive scoper.
-The user and scoper clarify the problem, desired outcome, constraints, acceptance criteria and open
-questions. The scoper can delegate bounded research questions and asks a reviewer to challenge the
-emerging brief. It works through findings before returning a reviewed brief, suggested direction and
-remaining unknowns or disagreements to the lead. Detailed solution design belongs to the architect.
-The user does not need to manage research or review exchanges or relay the scoper's findings.
+**1. Scope.** A dedicated scoper can investigate in the background or work directly with the user
+on the problem, outcome, constraints, acceptance criteria and open questions. When assigned a
+complete brief, it obtains reviewer feedback and returns a reviewed direction and remaining
+unknowns. A background investigation can instead return findings for the lead to use in planning
+or pass into a later interactive discussion. The user does not relay research or review exchanges.
 
-**2. Design the task.** Once the scope is sufficiently clear, the lead starts an interactive
-architect. The architect develops the detailed approach, including interfaces or a skeleton where
-useful, works through tradeoffs with the user and obtains reviewer feedback. After addressing
-findings and obtaining user approval, it returns the plan, decisions and remaining questions to the
-lead. Implementation proceeds from that approved design.
+**2. Design the task.** Where a dedicated architect helps, it develops the approach, including
+interfaces or a skeleton where useful, works through tradeoffs and obtains reviewer feedback.
+It reports the plan, decisions, approval state and open questions to the lead. Interactive work
+discusses decisions directly with the user; background work returns them through the lead.
+Implementation proceeds within the agreed plan or approved design.
 
-**3. Implement.** The lead assigns implementation to a developer in a separate context. The
-developer builds the approved design, focusing on production code. It can run existing tests and
-applicable checks during implementation, but does not write new unit or integration tests yet.
+**3. Implement.** The lead normally starts an interactive Developer conversation. The
+developer builds the agreed plan or design and runs existing checks. It includes unit and
+integration tests unless the chosen workflow assigns them separately or includes a
+code-before-tests checkpoint.
 
 **4. Review the code.** The developer commissions an independent reviewer to assess the
 implementation against the approved design and requirements, addresses findings and obtains
-follow-up review of relevant changes. The user then gives initial approval of the implementation.
-The lead records that approval before assigning test planning to the tester. This gate keeps the
-developer's context focused on production code and avoids
-spending effort writing tests for an implementation that has not yet been accepted as the basis for
-further work. Initial code approval permits test planning; it does not mean the task is finished.
+follow-up review of relevant changes. Combined assignments include the tests in this review.
+If the user has chosen a code-before-tests checkpoint, the lead obtains and records that approval
+before test authoring. Review findings alone do not create an additional user approval checkpoint.
 
-**5. Write unit and integration tests.** The lead starts a separate interactive tester with the
-design and implementation report. The tester proposes a concise test plan from requirements,
-acceptance examples and identified risks. Once the user approves the plan, the tester writes and
-runs the tests and applicable existing checks. A reviewer assesses the tests and any resulting
-production-code changes. The tester addresses findings and obtains follow-up review before asking
-the user to review the result, then reports results and remaining gaps to the lead. Production-code
-failures return through the lead to the developer; changes affecting approved decisions require
-renewed review and user approval as needed.
+**5. Write unit and integration tests.** When testing is assigned separately, the tester receives
+the plan or design, implementation report and existing authorization. It selects concise tests
+from requirements, acceptance examples and identified risks. It honors any chosen code or test-plan
+approval checkpoints, writes and runs tests and applicable checks, obtains independent review,
+addresses findings and reports results and gaps to the lead. Production-code failures return through
+the lead to the developer. Material changes to approved decisions require renewed user agreement.
 
-**6. Validate behavior.** The lead assigns a validator to start the app or server and exercise
-acceptance scenarios through its real interfaces. The validator can use the local-stack validation
-skill and returns evidence, failures and untested paths, with reviewer assessment of the evidence.
-The validator addresses evidence gaps and obtains follow-up review where needed. The lead routes
-failures to the relevant owner and arranges follow-up validation after fixes.
-Unit and integration test authoring remains the tester's responsibility.
+**6. Validate behavior.** When relevant to acceptance, the developer or a separate validator starts
+the app or server and exercises scenarios through real interfaces. It returns evidence, failures
+and untested paths for reviewer assessment, addresses evidence gaps and obtains follow-up review
+where needed. The lead routes failures to the assigned implementation or testing owner and arranges
+follow-up validation after fixes. A separate validator context is optional.
 
 **Review and deliver.** The lead continues through PR creation, checks, PR review comments and
 merge readiness. Creating, committing, pushing and merging remain subject to the user's
 authorization. A completed worker assignment does not by itself mean the task is accepted or ready
 to merge.
 
-These are responsibilities and approval boundaries, rather than a rigid one-way pipeline. Findings
-can reopen scope, architecture or implementation. The structure stays shallow: one lead with one
-layer of interactive workers beneath it, supported by bounded research and review assignments.
-Stages run as needed; the tree describes responsibility and communication, not simultaneous
-execution of every role.
+Findings can reopen scope, architecture or implementation. Keep the structure shallow: one lead
+with stage owners beneath it, supported by bounded research and review assignments. Reassess which
+stages need their own context, interactive discussion or an explicitly agreed checkpoint as the
+work develops.
 
-### Big task flow
+### Larger efforts across worktrees
 
 ```mermaid
 flowchart TB
@@ -146,10 +181,10 @@ flowchart TB
     O <--> A
     O <--> W
     subgraph TaskA["Worktree A · PR A"]
-        CA["Task lead A"] <--> WA["Small task flow"]
+        CA["Task lead A"] <--> WA["Selected task flow"]
     end
     subgraph TaskB["Worktree B · PR B"]
-        CB["Task lead B"] <--> WB["Small task flow"]
+        CB["Task lead B"] <--> WB["Selected task flow"]
     end
     O <--> CA
     O <--> CB
@@ -158,10 +193,11 @@ flowchart TB
 This larger-effort flow is a future extension; the research and task-splitting skills are deferred.
 Preparation establishes the direction before parallel implementation starts. Arrows show
 communication through the coordinating parent; there are no direct links between sibling agents or
-worktrees. Each small task flow expands into the structure above.
+worktrees. Each task lead chooses the small, medium or large flow appropriate to its own task.
 
-**1. Scope the overall effort.** The user starts with the overall lead, which launches a
-dedicated interactive scoper. The user and scoper establish the problem, desired outcome,
+**1. Scope the overall effort.** The user starts with the overall lead, which chooses bounded
+investigation or a dedicated interactive scoper according to uncertainty, risk and discussion needs.
+This expanded example uses an interactive scoper to establish the problem, desired outcome,
 constraints, acceptance criteria and open questions, supported by background research workers.
 The scoper commissions review and investigates its findings before returning a reviewed brief and
 suggested direction to the lead, which commissions overall architecture before the work is divided
@@ -176,8 +212,8 @@ to a background worker. It turns the approved architecture into tasks with clear
 dependencies and an integration sequence, then returns the breakdown to the lead.
 
 **4. Coordinate the tasks.** An overall lead coordinates execution across worktrees,
-communicating with each task lead. Each task follows the small task flow. The overall
-lead owns shared decisions, dependency management and verification of the combined outcome.
+communicating with each task lead. Each task uses the appropriate steps and interaction modes.
+The overall lead owns shared decisions, dependency management and verification of the combined outcome.
 The overall lead remains the coordinating context from the initial request through
 preparation and execution.
 
@@ -200,31 +236,31 @@ The workflow has seven configured Codex agent roles:
 
 | Role | Responsibility and output | User interaction |
 | --- | --- | --- |
-| Scoper | Clarifies the problem, outcome, constraints and acceptance criteria; returns a reviewed brief, suggested direction and unresolved questions | Separate interactive conversation after delegation |
-| Lead | Owns the task throughout its lifecycle; delegates, retains decisions and approval state, tracks progress and routes findings | Starting point and continuing coordination |
-| Architect | Develops the detailed design and implementation plan; works through tradeoffs and obtains reviewer feedback before user approval | Direct discussion and plan approval |
-| Developer | Implements the approved design, runs existing checks, addresses review and validation findings, and reports design drift | Initial code approval and discussion of changes |
-| Tester | Proposes unit and integration tests; after plan approval, writes and runs them, addresses reviewer findings and reports results | Test-plan approval and review of the result |
+| Scoper | Investigates requirements and returns findings or a reviewed brief, suggested direction and unresolved questions | Background investigation or direct scoping discussion |
+| Lead | Chooses and adapts the workflow; scopes and plans or delegates, retains decisions and approvals, tracks progress and routes findings | Starting point and continuing coordination |
+| Architect | Develops a design and implementation plan; works through tradeoffs and obtains reviewer feedback | Direct discussion or decisions returned through Lead |
+| Developer | Implements the agreed plan, includes tests and validation as assigned, addresses review findings and reports design drift | Normally interactive; background only for tiny, well-defined assignments |
+| Tester | Plans, authors and runs separately assigned unit and integration tests within existing authorization and chosen checkpoints | Through Lead or directly when test discussion is useful |
 | Reviewer | Independently reviews scope, architecture, implementation, unit and integration tests and validation evidence; reports findings to the commissioning owner | Normally background; available at relevant stages |
 | Validator | Runs the app or server and exercises acceptance scenarios through real interfaces; returns evidence, failures and untested paths | Available for discussion of behavior and evidence |
 
 The lead remains responsible throughout. Delegation protects its context: workers retain exploration
 and implementation detail, while the lead receives conclusions, supporting evidence, deviations and
-unresolved questions. Production-code implementation belongs to the developer. Unit and integration
-test authoring belongs to the tester, after initial code approval and approval of the test plan.
-Runtime validation uses a separate validator
-context. Each reviewer reports to the owner that commissioned the review.
+unresolved questions. The developer can own implementation, unit and integration tests and relevant
+validation under one agreed plan. Separate tester and validator contexts are available when useful.
+Each reviewer reports to the owner that commissioned the review.
 
-The scoper owns the interactive requirements discussion and returns a reviewed brief and suggested
-direction. It runs in a separate context from the lead, keeping exploration out of the lead's
-conversation. Background workers can answer bounded research questions in support of scoping; the
-lead uses the scoper's report to commission the architect's detailed design.
+Lead can scope and plan directly. A background scoper keeps investigation out of the user
+conversation and returns evidence, assumptions and questions to Lead. If sustained discussion
+becomes useful, Lead opens an interactive scoper with those findings and decisions. A complete
+reviewed brief can support planning in Lead or a dedicated architect's detailed design.
 
-Scoping review uses the existing reviewer role. The scoper gives the reviewer its rough brief and
+Review of a complete scoping brief uses the existing reviewer role. The scoper gives the reviewer its rough brief and
 supporting evidence; the reviewer challenges assumptions, missing requirements and the proposed
 direction. They can iterate and commission further research without the user managing each exchange.
 The scoper owns synthesis and reports unresolved disagreements alongside the brief. Questions
-requiring the user's intent or preferences still return to the user. This preserves the tree:
+requiring the user's intent or preferences return through Lead for background work or directly in
+interactive work. This preserves the tree:
 lead → scoper → reviewer, with no additional scoping role.
 
 Research is a planned reusable skill, with its definition deferred for now. Scopers, leads and
@@ -266,10 +302,9 @@ Required continuity should survive either choice.
 
 ### Local-stack validation skill
 
-This is a reusable procedure normally performed by the validator. The lead assigns runtime
-validation to a separate validator context; a developer can also use the skill for diagnosis within
-approved work. It complements unit and integration tests by checking the assembled application through its real
-interfaces.
+This is a reusable procedure for relevant runtime validation. Lead can include it in the developer's
+approved assignment or use a separate validator when useful. It complements unit and integration
+tests by checking the assembled application through its real interfaces.
 
 The assignment supplies the code revision or working-tree state, acceptance scenarios, required
 services and fixtures, and expected outcomes. The skill follows the repository's setup instructions
@@ -291,16 +326,19 @@ and existing authentication configuration. Its basic sequence is:
 The lead routes failures to the relevant owner and arranges another run after fixes. For a
 complex task, the overall lead can commission the same skill against the combined result
 after integration. The reviewer assesses validation evidence. Production fixes return to the
-developer, and unit or integration regression tests go to the tester under the test-plan approval
-boundary. The first scoping-only
-experiment does not require starting a stack.
+developer, and unit or integration regression tests go to the assigned implementation or testing
+owner within the agreed authorization and checkpoints. Scoping-only investigations do not require
+starting a stack.
 
 ### Realizing the workflow in Herdr TUI
 
-The current Codex setup provides all seven roles. Interactive stage owners use their
-`agentic-<role>` profiles, and independent reviews use native `reviewer` subagents. The
-cross-provider review convention discussed below is a future option from the original research;
-it is not required by the current role instructions.
+The current Codex setup provides all seven roles as CLI profiles and custom subagent definitions
+with the same instructions. For example, profile `agentic-scoper` and custom subagent `scoper`
+both use the Scoper role. Assignments explicitly state the interaction mode and user-question
+channel; the role name alone does not tell an agent whether the user will participate directly.
+Developer is normally interactive. Independent reviews use custom `reviewer` subagents. The cross-provider
+review convention discussed below is a future option from the original research; it is not required
+by the current role instructions.
 
 The first trial will use **Herdr TUI with herdr-reviewr**. Herdr supplies interactive agent panes
 and commands for launching, contacting and observing agents. Role instructions and skills define the
@@ -327,7 +365,8 @@ defaults remain to be chosen.
 
 #### Delegation and reporting
 
-The lead creates a tab or pane, starts a named worker with `herdr agent start`, and gives it
+For an interactive assignment, the lead creates a tab or pane, starts a named worker with
+`herdr agent start`, and gives it
 an assignment through `herdr agent prompt`. The assignment includes the lead's return
 address. The worker can use the same prompt command to report back, including after a direct
 conversation with the user. This requires no manual copying between chats. Herdr TUI provides the
@@ -335,13 +374,15 @@ delivery mechanism; the workflow establishes the parent relationship and reporti
 [Herdr agent automation](https://github.com/herdrdev/herdr/blob/master/docs/versions/0.9.5/website/src/content/docs/agent-automation.mdx).
 
 The delegation-and-handoff skill should make every assignment self-contained: task identity, working
-directory, approved inputs, expected outcome, approval boundaries, parent address and reporting
-triggers. For example, an architect's brief would include:
+directory, role, interaction mode, user-question channel, approved inputs, expected outcome,
+approval boundaries, parent address and reporting triggers. For example, an architect's brief
+would include:
 
-> Your lead is `task42-lead`. Discuss the design with the user and obtain independent reviewer
-> feedback. After addressing findings and obtaining user approval, save the plan and message the
-> lead with its location, the approved decisions and any open issues. Report blockers and
-> discoveries affecting scope as they arise. Do not begin implementation.
+> Your role is Architect; interaction mode is interactive. Discuss design questions directly with
+> the user here. Your lead and return address is `task42-lead`. Obtain independent reviewer feedback.
+> After addressing findings and obtaining user approval, save the plan and report its location,
+> approved decisions and open issues using `herdr agent prompt task42-lead "<summary>"` without
+> `--wait`. Report blockers and discoveries affecting scope as they arise. Do not begin implementation.
 
 Reports should distinguish progress, a request for a decision and completion of an assignment. The
 lead acknowledges the report and checks the relevant approval before assigning the next
@@ -353,54 +394,46 @@ its assignment links. These conventions belong in the shared handoff procedure.
 
 #### Simple tasks: one worktree
 
-1. **Start with the lead; delegate scoping.** Give the initial request to a named lead
-   in the task's worktree. It launches a separate interactive scoper with the request and its return
-   address. The user discusses the task with the scoper, which may delegate research to background
-   workers and commissions a native reviewer subagent. After working through review
-   findings, the scoper saves and reports a rough idea of what to do, a suggested direction and open
-   questions or disagreements. The lead receives that brief and uses it to commission
-   architecture when the workflow proceeds beyond scoping.
-1. **Open the architect conversation.** The lead launches an architect in another tab or
-   pane, explicitly using the same worktree, and supplies the brief and return address. The user
-   talks directly with the architect. After agent review and user approval, the architect saves the
-   plan and sends the result back. The lead uses that report to brief the developer.
-1. **Implement and review the code.** The lead starts a developer in the same worktree with the
-   approved design. The developer focuses on production code and may run existing tests and checks.
-   It commissions an independent code review, addresses findings, obtains follow-up review of
-   relevant changes and asks for initial user approval. The lead records that approval before
-   assigning test planning.
-1. **Write and review unit and integration tests.** The lead starts a separate interactive tester
-   with the design and implementation report. The tester proposes a concise test plan and, once
-   the user approves, writes and runs the tests and applicable existing checks. It obtains reviewer
-   feedback, resolves findings and arranges follow-up review before asking for user review. It
-   reports results, gaps and changes affecting approved decisions to the lead.
-1. **Validate behavior.** The lead starts a separate validator in the same worktree to exercise
-   acceptance scenarios through the running app or server. Its assignment can use local-stack
-   validation with real API and MCP requests. The validator obtains review of the evidence and
-   reports failures and untested paths. The lead routes follow-up work to the relevant owner.
-   Sharing a worktree gives access to current files; it does not authorize simultaneous conflicting
-   edits.
-1. **Review and deliver.** The user reviews through reviewr and sends local comments to the worker
-   responsible for the artifact. That worker reports consequential changes to the lead. The
-   lead tracks checks, outstanding feedback and delivery readiness, retaining the existing
-   authorization boundaries for PR creation, commits, pushes and merges.
+1. **Scope.** Give the request to a named lead in the task's worktree.
+   It can use a non-interactive Scoper for small tasks and discuss the findings with the user.
+   For unclear work, it starts with bounded background investigation and decides whether to continue
+   here or open an interactive scoper. Clear substantial work can start interactively immediately.
+1. **Plan.** Lead discusses the scoped direction with the user and agrees the implementation,
+   testing, relevant validation and any chosen checkpoints.
+1. **Implement.** Lead opens an interactive Developer with the plan, working directory,
+   acceptance criteria and authorization. The user can discuss the implementation directly there.
+   Developer implements and runs applicable existing checks within the assignment.
+1. **Test.** In the same Developer conversation, author and run the assigned tests, honoring any
+   chosen checkpoints. Obtain background review of code and tests, address findings and return
+   results and gaps to Lead, which tracks any remaining work.
+
+Expand when useful. Open an interactive specialist with the corresponding profile, the same
+worktree, findings, decisions and Lead's return address when ongoing user discussion is needed.
+A separate Architect, Tester or Validator can also work in the background when appropriate.
+Reassess this choice when later stages uncover uncertainty or risk. Relevant runtime validation can stay with Developer
+or be assigned separately, with evidence review and cleanup either way. Sharing a worktree does
+not authorize simultaneous conflicting edits.
+
+The user can review through reviewr and send comments to the responsible context. That context
+reports consequential changes to Lead, which tracks checks, feedback and delivery readiness.
+PR creation, commits, pushes and merges retain their existing authorization boundaries.
 
 The lead maintains a compact task record with the brief, current stage, worker addresses,
-artifact locations, approval state and unresolved decisions. Plans and reports live under
-`.context/plans/` and `.context/docs/` using dated filenames; the record links to them rather than
-collecting whole transcripts.
+artifact locations, approval state and unresolved decisions when handoffs need one. A small task
+can use the concise plan already agreed in the conversation. Written artifacts use the project's
+established location and dated filenames; the record links to them rather than collecting transcripts.
 
-The first experiment can stop at **lead → scoper → native reviewer → scoper → lead**.
-It should include review findings that the scoper addresses
-before returning the brief. Success means that the lead receives the reviewed direction and
-remaining questions without the user relaying the exchange. A subsequent full-task trial adds
-architecture, implementation, unit and integration testing, runtime validation and review feedback, including
-a design change made directly with the architect and correctly incorporated into the next assignment.
+Trial the small flow with background scoping and interactive development. Separately, try background
+scoping that reveals a need for interactive discussion and verify that findings, decisions and questions carry into the new
+conversation without repetition. Try a medium flow with background testing or validation, then a
+large flow with interactive specialists, including a design change made directly with an architect
+and incorporated into the next assignment.
 
 #### Complex tasks: leads across worktrees
 
-The user starts with the overall lead, which launches the dedicated scoper and receives its
-reviewed brief. In this future extension, it commissions the overall architect and, once the
+The user starts with the overall lead, which chooses the scoping mode. When dedicated scoping is
+useful, it receives the scoper's reviewed brief. In this future extension, it commissions the
+overall architect and, once the
 deferred split-work skill is available, delegates it after design approval using the same assignment
 and reporting procedure. After the task breakdown is approved, it arranges one worktree and task
 lead per PR. Each task lead receives its
@@ -467,17 +500,20 @@ complements upkeep throughout the work.
 
 ### Continuity and approval
 
-Handoffs preserve the current requirements, decisions and their rationale, approval state, relevant
-artifacts and open questions. Proposals remain distinguishable from approved decisions. A revised
-design or implementation may need renewed review; an earlier approval does not automatically cover
-subsequent changes. A successor context should be able to continue from this current state without
-reconstructing every conversation.
+Handoffs preserve current requirements, decisions and rationale, authorization, chosen checkpoints,
+relevant artifacts and open questions. Proposals remain distinguishable from approved decisions.
+One agreed plan may authorize implementation, tests and relevant validation. Preserve approval that
+still covers the work; an additional stage or agent does not itself require a new approval.
+Material scope or design changes need renewed user agreement before dependent work continues, and
+explicit checkpoints remain binding. Review relevant changes independently. A successor context
+should continue from this state without reconstructing every conversation.
 
 ### Initial scope and subsequent design
 
-Start with the scoping and review loop in Herdr TUI using the configured Codex roles and a native
-reviewer subagent. Then extend the trial through architecture, implementation, unit and integration
-testing, runtime validation and feedback with reviewr, with the user acting as the overall lead.
+Try the small, medium and large examples with the configured Codex roles and native review.
+Include background investigation that leads to interactive scoping and substantial work that starts
+interactively. Verify that Developer normally opens interactively, decisions and approvals survive
+handoffs, and the selected steps produce useful acceptance evidence.
 Cross-provider review remains a future option. The seven Codex roles are configured; model choices,
 cross-provider configuration and skill packaging remain to be decided. Research and
 task-splitting skill definitions are deferred. Cross-worktree orchestration will follow once the

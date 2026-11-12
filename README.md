@@ -7,11 +7,11 @@ the first target; Claude support can reuse the role instructions later.
 
 | Role | Responsibility |
 | --- | --- |
-| Lead | Own the task, delegate work, retain decisions and approvals, route findings. |
-| Scoper | Work with the user on the problem and acceptance criteria; return a reviewed brief. |
-| Architect | Develop the design with the user; return an independently reviewed, approved design. |
-| Developer | Implement the approved design, run existing checks, and report reviewed changes and design drift. |
-| Tester | Propose unit and integration tests; author, run and review them after plan approval. |
+| Lead | Choose and adapt the workflow, scope and plan or delegate, retain decisions and approvals. |
+| Scoper | Investigate scope in the background or discuss requirements with the user; return findings or a reviewed brief. |
+| Architect | Develop a design interactively or in the background; return reviewed decisions and approval state. |
+| Developer | Implement the agreed plan, include tests and validation as assigned, and report reviewed results and design drift. |
+| Tester | Plan, author and run separately assigned unit and integration tests within the agreed authorization. |
 | Validator | Exercise acceptance scenarios on a throwaway instance and return reviewed evidence. |
 | Reviewer | Independently review the assigned artifact against its requirements and stage. |
 
@@ -51,24 +51,34 @@ From a Herdr pane, start a Lead conversation in the project you want to work on:
 codex --profile agentic-lead -C /path/to/project
 ```
 
-Give it a task and ask it to start with scoping. Lead opens Scoper in a separate
-Herdr tab using the Scoper profile, in the same workspace and project directory.
-Discuss scope directly there. The assignment includes Lead's live pane ID or unique
-agent name so Scoper can message its reviewed brief and decisions back to Lead.
-A reviewed brief does not authorize implementation; existing scoped work can skip
-repeated scoping.
+Give Lead a task. It selects which steps run and which agents are interactive. Small
+tasks can use a background Scoper, planning in Lead and an interactive Developer
+handling implementation and tests. Medium tasks may add an interactive Architect
+and separate background testing or validation. Large tasks can use interactive
+specialists throughout. Reviews and documentation work run in the background.
 
-Lead opens interactive stage owners in separate Herdr tabs using their
-`agentic-<role>` profiles. Research, reviews and documentation updates use native
-non-interactive subagents. Use `/subagents` to inspect those threads; use Herdr tabs
-for direct user conversations. Native reviews use the `reviewer` role; standalone
-review sessions use the `agentic-reviewer` profile. All role profiles also support
-standalone sessions, with an explicit user handoff when no caller address is available.
+For unclear work, Lead can first assign a bounded background Scoper investigation.
+It brings findings and questions back to you, then continues in Lead or opens an
+interactive Scoper. Clearly substantial work needing dedicated discussion can start
+there immediately. Lead makes the same choice at later stages based on uncertainty,
+risk and discussion needs, carrying findings and decisions across handoffs.
 
-The Lead follows scoping, architecting, developing, unit and integration testing,
-validating and documenting. It tracks approvals and keeps docs current. Developer
-may run existing checks; Tester authors new unit and integration tests after
-initial code approval and user approval of the proposed test plan.
+Interactive specialists use `agentic-<role>` profiles in separate Herdr tabs in the
+same workspace and project directory. Their assignments include Lead's live pane ID
+or unique agent name for replies. The same role instructions are available as custom
+subagent roles for background work: `scoper` corresponds to `agentic-scoper`, for
+example. Each assignment explicitly states its interaction mode and where to send
+user questions; the role name does not determine that. Developer is normally interactive;
+non-interactive development is reserved for tiny, well-defined changes. Use
+`/subagents` to inspect background threads.
+Custom Reviewer subagents use `reviewer`; separate CLI sessions use `agentic-reviewer`.
+All profiles support standalone sessions with an explicit user handoff when needed.
+
+One agreed plan may authorize implementation, tests and relevant validation. Extra
+approval is needed for material scope or design changes or explicitly chosen
+checkpoints. The fuller workflow can use separate Architect, Tester and Validator
+contexts and code-before-tests approval when useful. A reviewed brief alone does
+not authorize implementation, and a new agent does not require repeating approval.
 See [the Lead role](roles/lead.md) for the workflow.
 
 Profiles apply to CLI sessions selected with `--profile`; they do not automatically
@@ -87,8 +97,10 @@ python3 scripts/deploy.py --check
 Tests use temporary destinations and cover generated TOML, deployment conflicts,
 backups, repeat deployment, and preservation of unrelated configuration. `--check`
 reports whether the installed files exactly match the current sources. These checks
-do not prove model behavior: try direct scoping in its Herdr tab, verify the return
-message reaches Lead, and confirm no implementation starts without approval.
+do not prove model behavior: try small, medium and large task flows, including
+background scoping that leads to an interactive handoff. Verify Developer normally
+opens interactively, findings and questions reach Lead, approvals carry forward,
+and implementation stays within the agreed plan and checkpoints.
 
 To remove the setup, delete only the fourteen generated role/profile files after checking
 their markers, and restore any desired backups. Nothing is added to shell startup

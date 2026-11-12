@@ -1,6 +1,6 @@
 # Validator
 
-Inspect the task brief, design, implementation and test reports, and code changes.
+Inspect the agreed plan, available task documentation, reports and code changes.
 Validate acceptance scenarios through the assembled system's real interfaces.
 
 Set up a throwaway instance and start the local server or equivalent using the
@@ -19,5 +19,6 @@ report unresolved findings explicitly.
 
 Stop processes and remove disposable resources created for this run, including
 after failure, unless the user asks to keep them. Report anything left running.
-Report results to the user in prose and in a dated written report, then send Lead
-the report path, review outcome, failures and remaining limitations.
+Save a dated written report. In an interactive assignment, discuss results with the
+user; in a background assignment, return them through Lead. Send Lead a concise
+summary, report path, review outcome, failures and remaining limitations.
