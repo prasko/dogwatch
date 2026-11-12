@@ -41,30 +41,28 @@ belong in this repository; redeployment replaces local edits after backing them 
 
 ## Use
 
-Start a Lead conversation in the project you want to work on:
+From a Herdr pane, start a Lead conversation in the project you want to work on:
 
 ```sh
 codex --profile agentic-lead -C /path/to/project
 ```
 
-Give it a task and ask it to start with scoping. The first trial is Lead → Scoper
-→ Reviewer → Scoper → Lead. It stops at a reviewed brief and unresolved questions;
-it does not infer permission to implement. Existing scoped work can skip repeated
-scoping. Use `/subagents` in the CLI to inspect and switch agent threads.
+Give it a task and ask it to start with scoping. Lead opens Scoper in a separate
+Herdr tab using the Scoper profile, in the same workspace and project directory.
+Discuss scope directly there. The assignment includes Lead's live pane ID or unique
+agent name so Scoper can message its reviewed brief and decisions back to Lead.
+A reviewed brief does not authorize implementation; existing scoped work can skip
+repeated scoping.
 
-Direct conversation inside a spawned Scoper thread still needs a live client
-trial. If the client cannot support it, the Lead relays questions explicitly.
-For a separate interactive conversation, start
-`codex --profile agentic-scoper -C /path/to/project` and supply the assignment and
-brief path. That separate session has no automatic return channel: give its saved
-brief back to Lead. The Reviewer profile is also available for standalone review.
+Lead delegates detailed work to native non-interactive subagents and keeps concise
+results for coordination. Use `/subagents` to inspect those threads; use Herdr tabs
+for direct user conversations. Scoper and Reviewer profiles also support standalone
+sessions, with an explicit user handoff when no caller address is available.
 
-The Lead can later brief ordinary workers for architecture, development and runtime
-validation. Those responsibilities remain separate even without custom definitions.
-Implementation requires an approved design. The developer may run existing tests
-while focusing on production code; new unit-test authoring starts after independent
-code review and initial user approval. Runtime validation exercises real acceptance
-scenarios. Initial code approval does not mean the task is finished.
+The Lead follows scoping, architecting, developing, reviewing and validating,
+delegating to ordinary workers where no custom role exists. It owns approvals,
+the gate for authoring new unit/integration tests, and keeping docs current.
+See [the Lead role](roles/lead.md) for the workflow.
 
 Profiles apply to CLI sessions selected with `--profile`; they do not automatically
 turn every app conversation into Lead. Project configuration can override profile
@@ -82,8 +80,8 @@ python3 scripts/deploy.py --check
 Tests use temporary destinations and cover generated TOML, deployment conflicts,
 backups, repeat deployment, and preservation of unrelated configuration. `--check`
 reports whether the installed files exactly match the current sources. These checks
-do not prove model behavior: try the scoping/review loop on a real brief, inspect the
-findings and handoff, and confirm no implementation starts without approval.
+do not prove model behavior: try direct scoping in its Herdr tab, verify the return
+message reaches Lead, and confirm no implementation starts without approval.
 
 To remove the setup, delete only the six generated role/profile files after checking
 their markers, and restore any desired backups. Nothing is added to shell startup
