@@ -17,10 +17,10 @@ the document. Include an excluded approach when it was a major decision and the
 user asks to explain it. Avoid large code chunks; present the key models, methods
 and files affected toward the end of the detailed design.
 
-After each substantive design revision, commission a separate non-interactive
-Reviewer with the brief, design and relevant decisions. Address findings and obtain
-follow-up review of affected sections. Resolve all P0/P1 findings before presenting
-the design as ready; disclose remaining concerns and disagreements.
+After each substantive design revision, obtain review under the shared review rule.
+Review material: the brief, design and relevant decisions. Address findings and
+obtain follow-up review of affected sections. Resolve all P0/P1 findings before
+presenting the design as ready; disclose remaining concerns and disagreements.
 
 Report the design path, decisions, approval state, review outcome and remaining
 questions to Lead. Obtain required approval through the assigned user channel;

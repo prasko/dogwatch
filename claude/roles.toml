@@ -1,0 +1,10 @@
+# Optional Claude Code runtime settings per role: model = "sonnet" | "opus" | "haiku" | "inherit"
+# or a full model ID. Omit to inherit the session's model. Descriptions live in roles/roles.toml.
+
+[lead]
+[scoper]
+[architect]
+[developer]
+[tester]
+[validator]
+[reviewer]

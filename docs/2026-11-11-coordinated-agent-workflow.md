@@ -65,7 +65,7 @@ The diagram shows conversations and handoffs; one conversation can cover several
 One agreed plan may authorize implementation, tests and relevant validation. Additional approval
 is needed for material changes to scope or design or checkpoints explicitly chosen with the user.
 Existing approvals carry forward across agent handoffs. A preliminary investigation returns
-evidence, assumptions and open questions; it need not produce a complete reviewed brief. If an
+evidence, assumptions and open questions; it need not produce a complete brief. If an
 interactive scoper is opened later, it receives those findings and decisions so work is not repeated.
 
 ### Medium task flow
@@ -88,7 +88,7 @@ flowchart TB
     U["User"] <--> L
     subgraph Task["One task · one worktree · one PR"]
         L["Task lead<br/>Decisions, approvals, progress and delivery"]
-        S["1. Scope<br/>Scoper · interactive · reviewed brief"]
+        S["1. Scope<br/>Scoper · interactive · brief"]
         A["2. Design<br/>Architect · reviewer feedback and user approval"]
         D["Developer<br/>3. Production code · existing checks<br/>4. Code review and initial user approval"]
         T["5. Unit and integration tests<br/>Tester · approved plan, execution and review"]
@@ -117,11 +117,15 @@ The numbered stages show the expanded progression; the arrows show delegation an
 Reviewer nodes are assignments of the same role, each reporting to its commissioning owner. The user
 starts with the lead and can enter an interactive specialist conversation where useful. Background
 workers send user questions through the lead. Workers can delegate bounded research or review.
+Reviews are flattened for background stage owners: an interactive owner commissions its own
+reviewer, while a background owner returns its result ready for review and the lead commissions the
+review and routes findings back. This keeps the workflow valid where subagents cannot start their
+own subagents, as can be the case in Claude Code.
 
 **1. Scope.** A dedicated scoper can investigate in the background or work directly with the user
 on the problem, outcome, constraints, acceptance criteria and open questions. When assigned a
-complete brief, it obtains reviewer feedback and returns a reviewed direction and remaining
-unknowns. A background investigation can instead return findings for the lead to use in planning
+complete brief, it returns a direction and remaining unknowns. Scope review is optional and
+reserved for large tasks where Lead requests it, subject to user override. A background investigation can instead return findings for the lead to use in planning
 or pass into a later interactive discussion. The user does not relay research or review exchanges.
 
 **2. Design the task.** Where a dedicated architect helps, it develops the approach, including
@@ -199,7 +203,7 @@ worktrees. Each task lead chooses the small, medium or large flow appropriate to
 investigation or a dedicated interactive scoper according to uncertainty, risk and discussion needs.
 This expanded example uses an interactive scoper to establish the problem, desired outcome,
 constraints, acceptance criteria and open questions, supported by background research workers.
-The scoper commissions review and investigates its findings before returning a reviewed brief and
+When Lead requests scope review, the scoper commissions it and investigates its findings before returning the brief and
 suggested direction to the lead, which commissions overall architecture before the work is divided
 across worktrees.
 
@@ -232,11 +236,11 @@ An agent role defines responsibility and the context in which work happens. A sk
 repeatable procedure that a suitable agent can perform. Stages, roles and conversations need not map
 one to one, and a role does not automatically require a custom agent definition.
 
-The workflow has seven configured Codex agent roles:
+The workflow has seven agent roles, configured for both Codex and Claude Code:
 
 | Role | Responsibility and output | User interaction |
 | --- | --- | --- |
-| Scoper | Investigates requirements and returns findings or a reviewed brief, suggested direction and unresolved questions | Background investigation or direct scoping discussion |
+| Scoper | Investigates requirements and returns findings or a brief, suggested direction and unresolved questions | Background investigation or direct scoping discussion |
 | Lead | Chooses and adapts the workflow; scopes and plans or delegates, retains decisions and approvals, tracks progress and routes findings | Starting point and continuing coordination |
 | Architect | Develops a design and implementation plan; works through tradeoffs and obtains reviewer feedback | Direct discussion or decisions returned through Lead |
 | Developer | Implements the agreed plan, includes tests and validation as assigned, addresses review findings and reports design drift | Normally interactive; background only for tiny, well-defined assignments |
@@ -248,14 +252,15 @@ The lead remains responsible throughout. Delegation protects its context: worker
 and implementation detail, while the lead receives conclusions, supporting evidence, deviations and
 unresolved questions. The developer can own implementation, unit and integration tests and relevant
 validation under one agreed plan. Separate tester and validator contexts are available when useful.
-Each reviewer reports to the owner that commissioned the review.
+Each reviewer reports to the owner that commissioned the review: the interactive stage owner, or
+the lead on behalf of a background stage owner.
 
 Lead can scope and plan directly. A background scoper keeps investigation out of the user
 conversation and returns evidence, assumptions and questions to Lead. If sustained discussion
 becomes useful, Lead opens an interactive scoper with those findings and decisions. A complete
-reviewed brief can support planning in Lead or a dedicated architect's detailed design.
+brief can support planning in Lead or a dedicated architect's detailed design.
 
-Review of a complete scoping brief uses the existing reviewer role. The scoper gives the reviewer its rough brief and
+Scope review is optional; Lead requests it only for large tasks where it is worthwhile. It uses the existing reviewer role. The scoper gives the reviewer its rough brief and
 supporting evidence; the reviewer challenges assumptions, missing requirements and the proposed
 direction. They can iterate and commission further research without the user managing each exchange.
 The scoper owns synthesis and reports unresolved disagreements alongside the brief. Questions
@@ -332,11 +337,12 @@ starting a stack.
 
 ### Realizing the workflow in Herdr TUI
 
-The current Codex setup provides all seven roles as CLI profiles and custom subagent definitions
-with the same instructions. For example, profile `agentic-scoper` and custom subagent `scoper`
-both use the Scoper role. Assignments explicitly state the interaction mode and user-question
+The current setup generates all seven roles for Codex and Claude Code from shared instructions plus
+a short per-tool note. Codex gets CLI profiles and custom subagent definitions: profile
+`agentic-scoper` and custom subagent `scoper` both use the Scoper role. Claude Code gets one agent
+per role, such as `agentic-scoper`, used both through `claude --agent` and as a subagent. Assignments explicitly state the interaction mode and user-question
 channel; the role name alone does not tell an agent whether the user will participate directly.
-Developer is normally interactive. Independent reviews use custom `reviewer` subagents. The cross-provider
+Developer is normally interactive. Independent reviews use the same tool's Reviewer subagent. The cross-provider
 review convention discussed below is a future option from the original research; it is not required
 by the current role instructions.
 
@@ -432,7 +438,7 @@ and incorporated into the next assignment.
 #### Complex tasks: leads across worktrees
 
 The user starts with the overall lead, which chooses the scoping mode. When dedicated scoping is
-useful, it receives the scoper's reviewed brief. In this future extension, it commissions the
+useful, it receives the scoper's brief. In this future extension, it commissions the
 overall architect and, once the
 deferred split-work skill is available, delegates it after design approval using the same assignment
 and reporting procedure. After the task breakdown is approved, it arranges one worktree and task
@@ -510,11 +516,12 @@ should continue from this state without reconstructing every conversation.
 
 ### Initial scope and subsequent design
 
-Try the small, medium and large examples with the configured Codex roles and native review.
+Try the small, medium and large examples with the configured Codex and Claude Code roles and
+same-tool review.
 Include background investigation that leads to interactive scoping and substantial work that starts
 interactively. Verify that Developer normally opens interactively, decisions and approvals survive
 handoffs, and the selected steps produce useful acceptance evidence.
-Cross-provider review remains a future option. The seven Codex roles are configured; model choices,
-cross-provider configuration and skill packaging remain to be decided. Research and
+Cross-provider review remains a future option. The seven roles are configured for both tools; model and
+reasoning-level choices, cross-provider review configuration and skill packaging remain to be decided. Research and
 task-splitting skill definitions are deferred. Cross-worktree orchestration will follow once the
 small task workflow is useful in practice.

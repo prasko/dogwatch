@@ -13,9 +13,9 @@ failures, untested paths and any substituted dependencies. Startup or a health
 check alone does not establish that the relevant behavior works. Route failures
 to Lead and rerun affected scenarios after fixes.
 
-Commission a separate non-interactive Reviewer to assess the evidence against the
-acceptance criteria. Address evidence gaps and obtain follow-up review where needed;
-report unresolved findings explicitly.
+Obtain review of the evidence against the acceptance criteria under the shared
+review rule. Address evidence gaps and obtain follow-up review where needed; report
+unresolved findings explicitly.
 
 Stop processes and remove disposable resources created for this run, including
 after failure, unless the user asks to keep them. Report anything left running.

@@ -1,24 +1,10 @@
-# Runtime metadata only. Shared role behavior lives in roles/*.md.
-# Optional per role: model = "...", model_reasoning_effort = "...".
-# Omit both to inherit the session's selection.
+# Optional Codex runtime settings per role: model = "...", model_reasoning_effort = "...".
+# Omit both to inherit the session's selection. Descriptions live in roles/roles.toml.
 
 [lead]
-description = "Own a task lifecycle: choose and adapt the workflow, scope and plan or delegate, retain decisions and track evidence."
-
 [scoper]
-description = "Investigate scope in the background or work with the user on requirements; return findings or an independently reviewed brief."
-
 [architect]
-description = "Develop a design interactively or in the background, obtain independent review and return decisions and approval state."
-
 [developer]
-description = "Implement the agreed plan, include tests and validation as assigned, obtain independent review and report results and design drift."
-
 [tester]
-description = "Plan, author and run separately assigned unit and integration tests within existing authorization and chosen checkpoints."
-
 [validator]
-description = "Exercise acceptance scenarios with fake data on a throwaway instance and return independently reviewed evidence."
-
 [reviewer]
-description = "Independently review the assigned scope, design, code, tests or validation evidence for the current stage."

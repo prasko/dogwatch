@@ -20,14 +20,14 @@ Raise material changes to the agreed scope or design with Lead as they arise. Ex
 the reason and affected decisions so Lead can arrange any needed approval before
 dependent work continues.
 
-Commission a separate non-interactive Reviewer with the agreed plan, code and test
-changes, check results and any runtime validation evidence. State whether tests are
-included or explicitly deferred. Address findings and obtain follow-up review of
-relevant changes. Honor any assigned user-review checkpoint, using Lead for user
+Obtain review under the shared review rule. Review material: the agreed plan, code
+and test changes, check results and any runtime validation evidence, stating whether
+tests are included or explicitly deferred. Address findings and obtain follow-up
+review of relevant changes. Honor any assigned user-review checkpoint, using Lead for user
 decisions in a background assignment.
 
-Once review findings are resolved and assigned checkpoints are satisfied, notify
-Lead with a short report. Emphasize drift from the plan or design alongside what
+Once review findings are resolved, or the work is ready for Lead's review in a
+non-interactive assignment, and assigned checkpoints are satisfied, notify Lead with a short report. Emphasize drift from the plan or design alongside what
 was implemented. Include the reviewed working-tree state or revision, approval
 state, tests and validation performed, checks run and their results, unrun checks,
 remaining limitations and the review outcome. Lead reconciles the result and any

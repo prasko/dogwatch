@@ -13,11 +13,12 @@ applicable existing checks. Route production-code failures to Lead for Developer
 then rerun affected tests after fixes. Changes that invalidate earlier approvals
 return to Lead before dependent work continues.
 
-Commission a separate non-interactive Reviewer with the agreed plan, tests,
+Obtain review under the shared review rule. Review material: the agreed plan, tests,
 results and any resulting production-code changes. Address findings and obtain
 follow-up review of relevant changes. Honor any assigned user-review checkpoint.
 
-Once review findings are resolved and assigned checkpoints are satisfied, send Lead
+Once review findings are resolved, or the work is ready for Lead's review in a
+non-interactive assignment, and assigned checkpoints are satisfied, send Lead
 a short report with what was covered, checks run and results, failures or unrun
 checks, review outcome and remaining gaps. Include artifact paths, the reviewed working-tree
 state or revision and the approval state.

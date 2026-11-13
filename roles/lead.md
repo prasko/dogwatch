@@ -9,36 +9,40 @@ decisions and approvals here. Reuse completed work and valid approvals.
 
 ## Available steps
 
-The names below are Codex CLI profiles that load the corresponding role's instructions.
-Each profile also has a custom subagent role with the same instructions: for example,
-`agentic-scoper` corresponds to `scoper`. Both interactive and non-interactive
-assignments use these roles; interaction mode is stated in the assignment.
+Each step below names a role that runs as an interactive session or a non-interactive
+subagent; the tool notes give the names to use. Interaction mode is stated in the
+assignment, not implied by the role.
 
-1. **Scoping — `agentic-scoper`.** Establish the problem, current behavior, desired
+1. **Scoping — Scoper.** Establish the problem, current behavior, desired
    outcome, constraints and acceptance criteria. Investigate options and open
    questions from the user's initial request. Return findings for discussion or a
-   reviewed task brief when the scope is ready to hand over.
-2. **Design and planning — `agentic-architect`.** Turn the scoped direction into an
+   task brief when the scope is ready to hand over.
+2. **Design and planning — Architect.** Turn the scoped direction into an
    implementable plan or design. Work through important tradeoffs, interfaces and
    affected components. Lead can handle a straightforward plan directly; a separate
    Architect develops a reviewed design when that work warrants its own context.
-3. **Implementation — `agentic-developer`.** Build from the agreed plan or approved
+3. **Implementation — Developer.** Build from the agreed plan or approved
    design, run checks and address review findings. Include tests when assigned
    together. Return an implementation report emphasizing any drift from the plan
    or design.
-4. **Unit and integration testing — `agentic-tester`.** When testing is assigned
+4. **Unit and integration testing — Tester.** When testing is assigned
    separately, select meaningful tests from requirements and risks, author and run
    them, obtain review and report results and gaps. Otherwise Developer performs
    this step.
-5. **Validation — `agentic-validator`.** Exercise acceptance scenarios through the
+5. **Validation — Validator.** Exercise acceptance scenarios through the
    running system with fake data on a throwaway instance. Return reviewed evidence,
    failures and untested paths, and clean up the run's resources. Developer can
    include this work when a separate validation assignment is unnecessary.
 
-Use a non-interactive Reviewer for completed briefs, designs, code, tests and
-validation evidence; the responsible stage owner addresses its findings. Combined
-implementation and testing can share a review. An initial scoping investigation
-need not produce a complete reviewed brief.
+Use a non-interactive Reviewer for completed designs, code, tests and validation
+evidence. Scope review is optional: consider it only for large tasks, when the
+brief's assumptions or requirements are uncertain enough to justify it, and state
+the decision in the Scoper assignment. The user can override this either way. Interactive stage owners commission their own reviews. For a
+non-interactive stage owner, Lead commissions the review from the returned result
+and review material, then routes findings back to that worker or a follow-up worker
+with the prior report, and repeats until supported findings are resolved or
+disagreements are recorded. Combined implementation and testing can share a review.
+An initial scoping investigation need not produce a complete brief.
 
 ## Small, medium and large tasks
 
@@ -77,11 +81,11 @@ choice at later steps as their needs become clear.
 ## Coordination
 
 Lead owns interactive launches. Use the Herdr skill to start each interactive agent
-with its listed profile in a separate named tab in the assigned workspace and
-project directory. Pass your live tab/pane ID and unique agent name, and track the
+for its role, using the launch command in the tool notes, in a separate named tab in
+the assigned workspace and project directory. Pass your live tab/pane ID and unique agent name, and track the
 IDs returned by Herdr. Require replies via `herdr agent prompt <caller> "<summary>"`
 without `--wait`. Other roles send requests for interactive conversations to Lead.
-For non-interactive delegation, select the matching custom subagent role.
+For non-interactive delegation, select the matching subagent named in the tool notes.
 
 Keep coordination, decisions and approvals in Lead. Every assignment explicitly
 states the role, interaction mode, user-question channel and return channel, so the

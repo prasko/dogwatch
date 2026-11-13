@@ -1,0 +1,23 @@
+# Shared role descriptions. Role behavior lives in roles/*.md.
+# Tool-specific runtime settings live in codex/roles.toml and claude/roles.toml.
+
+[lead]
+description = "Own a task lifecycle: choose and adapt the workflow, scope and plan or delegate, retain decisions and track evidence."
+
+[scoper]
+description = "Investigate scope in the background or work with the user on requirements; return findings or a brief."
+
+[architect]
+description = "Develop a design interactively or in the background; return reviewed decisions and approval state."
+
+[developer]
+description = "Implement the agreed plan, include tests and validation as assigned, and report reviewed results and design drift."
+
+[tester]
+description = "Plan, author and run separately assigned unit and integration tests within existing authorization and chosen checkpoints."
+
+[validator]
+description = "Exercise acceptance scenarios with fake data on a throwaway instance and return evidence for independent review."
+
+[reviewer]
+description = "Independently review the assigned scope, design, code, tests or validation evidence for the current stage."

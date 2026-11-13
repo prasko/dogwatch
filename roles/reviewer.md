@@ -31,7 +31,7 @@ When implementation and testing are assigned together, review both in the same
 assignment. Honor an explicit test-authoring boundary when they are separate.
 
 Use targeted existing checks when they help establish a finding and are within the
-assignment. Consult README/AGENTS.md and report what ran and what did not. Do not
+assignment. Consult the README and project agent instructions, and report what ran and what did not. Do not
 automatically launch the full test suite, a live stack or mutating checks for every
 artifact review; request the relevant owner to obtain evidence where needed.
 
