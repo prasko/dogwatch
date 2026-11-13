@@ -41,8 +41,8 @@ class DeploymentTests(unittest.TestCase):
             self.assertIn(f"# {role.title()}", profile["developer_instructions"])
             self.assertEqual(set(profile),
                              {"developer_instructions", "model", "model_reasoning_effort"})
-            self.assertEqual({k: v for k, v in agent.items()
-                              if k not in ("name", "description")}, profile)
+            self.assertEqual(set(agent), {"name", "description", "developer_instructions"})
+            self.assertIn("| researcher | `fast` | gpt-6-luna | medium |", agent["developer_instructions"])
             self.assertIn("## Codex notes", profile["developer_instructions"])
             self.assertNotIn("Claude", profile["developer_instructions"])
 
@@ -90,6 +90,7 @@ class DeploymentTests(unittest.TestCase):
             "[roles.lead]\n", '[roles.lead]\nmodel = "fable"\n'))
         lead = deploy.render(root, ("claude",))["claude"]["agents/agentic-lead.md"]
         self.assertIn('model: "fable"', lead)
+        self.assertIn("| lead | `deep` | fable | medium |", lead)
         self.assertIn('effort: "medium"', lead)
 
         config.write_text(config.read_text().replace('effort = "low"', 'effort = "ultra"'))

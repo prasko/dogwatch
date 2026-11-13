@@ -60,27 +60,36 @@ def _load_runtime(root, target):
         effort = settings.get(EFFORT_KEY[target])
         if effort is not None and effort not in EFFORTS:
             raise ValueError(f"Unsupported effort {effort!r} for {role} in {where}")
-        resolved[role] = {"description": description, **settings}
+        resolved[role] = {"description": description, "tier": tier, **settings}
     for tier, settings in tiers.items():
         if settings.get(EFFORT_KEY[target], "low") not in EFFORTS:
             raise ValueError(f"Unsupported effort for tier {tier} in {where}")
     return resolved, tiers
 
 
-def _tier_notes(target, tiers):
+def _tier_notes(target, tiers, resolved):
     key = EFFORT_KEY[target]
-    rows = "".join(f"| `{tier}` | {settings.get('model', 'session default')} | "
-                   f"{settings.get(key, 'session default')} |\n"
-                   for tier, settings in tiers.items())
-    return ("\n\n### Model tiers\n\n| Tier | Model | Effort |\n| --- | --- | --- |\n" + rows)
+
+    def cells(settings):
+        return (f"{settings.get('model', 'session default')} | "
+                f"{settings.get(key, 'session default')}")
+
+    tier_rows = "".join(f"| `{tier}` | {cells(settings)} |\n" for tier, settings in tiers.items())
+    role_rows = "".join(f"| {role} | `{settings['tier']}` | {cells(settings)} |\n"
+                        for role, settings in resolved.items())
+    return ("\n\n### Model tiers\n\n| Tier | Model | Effort |\n| --- | --- | --- |\n"
+            + tier_rows
+            + "\n### Role defaults\n\nIncludes per-role overrides; an assignment's stated tier "
+            "replaces them.\n\n| Role | Tier | Model | Effort |\n| --- | --- | --- | --- |\n"
+            + role_rows)
 
 
-def _instructions(root, role, target, tiers):
+def _instructions(root, role, target, tiers, resolved):
     parts = [root / "roles/common.md", root / f"roles/{role}.md", root / f"{target}/notes.md"]
     texts = [path.read_text().strip() for path in parts]
     if not all(texts):
         raise ValueError(f"Empty instructions for {role} ({target})")
-    return "\n\n".join(texts) + _tier_notes(target, tiers)
+    return "\n\n".join(texts) + _tier_notes(target, tiers, resolved)
 
 
 def _toml(values):
@@ -100,12 +109,16 @@ def render(root=ROOT, targets=TARGETS):
         for role in ROLES:
             runtime = dict(resolved[role])
             description = runtime.pop("description")
-            instructions = _instructions(root, role, target, tiers)
+            del runtime["tier"]
+            instructions = _instructions(root, role, target, tiers, resolved)
             if target == "codex":
-                runtime["developer_instructions"] = instructions
+                # Custom-agent model settings override spawn-time values in Codex, so
+                # subagents leave them to the caller; interactive profiles pin them.
                 files[f"agents/{role}.toml"] = _toml(
-                    {"name": role, "description": description, **runtime})
-                files[f"agentic-{role}.config.toml"] = _toml(runtime)
+                    {"name": role, "description": description,
+                     "developer_instructions": instructions})
+                files[f"agentic-{role}.config.toml"] = _toml(
+                    {**runtime, "developer_instructions": instructions})
             else:
                 # JSON strings are valid YAML double-quoted scalars.
                 frontmatter = {"name": f"agentic-{role}",

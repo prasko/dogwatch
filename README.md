@@ -72,6 +72,10 @@ codex --profile agentic-lead -C /path/to/project
 cd /path/to/project && claude --agent agentic-lead
 ```
 
+Codex only delegates to subagents when the user or applicable AGENTS.md or skill
+instructions ask for it; role instructions alone may not count. Make sure your global
+or project AGENTS.md asks for delegation, as the roles describe.
+
 Give Lead a task. It selects which steps run and which agents are interactive. Small
 tasks can use a background Scoper, planning in Lead and an interactive Developer
 handling implementation and tests. Medium tasks may add an interactive Architect

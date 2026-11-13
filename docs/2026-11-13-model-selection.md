@@ -20,7 +20,7 @@ Checked 2026-11-13 against Claude Code 2.1.322 and Codex 0.167.2.
 | --- | --- | --- |
 | Role default | Agent frontmatter `model` (alias such as `opus`, `sonnet`, `haiku`, `fable`, or a full ID) and `effort` | Custom agent and profile `model`, `model_reasoning_effort` |
 | Interactive session override | `claude --agent agentic-<role> --model <m> --effort <level>` | `codex --profile agentic-<role> -m <m> -c model_reasoning_effort=<level>` |
-| Per-subagent override | Agent tool `model` and `effort` parameters; `effort` only when instructions explicitly ask | To verify: whether the subagent spawn call accepts a model or effort override |
+| Per-subagent override | Agent tool `model` and `effort` parameters; `effort` only when instructions explicitly ask | Spawn `model` and `reasoning_effort`, only with `fork_turns="none"`; custom-agent settings take precedence over them |
 | Effort levels | low, medium, high, xhigh, max | low, medium, high, xhigh, max, ultra (ultra adds automatic delegation) |
 
 Available models of interest:
@@ -118,8 +118,12 @@ Researcher role.
   `model_reasoning_effort` (Codex) or `effort` (Claude). Per-role tables stay, for exceptions that
   bypass the tier.
 - The deploy script resolves each role's tier into concrete settings: the Claude frontmatter
-  `model`/`effort`, and the Codex agent and profile `model`/`model_reasoning_effort`.
-- The generated tool notes include the tier table and override syntax for that tool.
+  `model`/`effort` and the Codex profile `model`/`model_reasoning_effort`. Codex custom-agent
+  files set no model, because their settings would override spawn-time values; callers always pass
+  the role's default (or the assignment's tier) model and effort when spawning. A subagent spawned
+  without them gets the configured default subagent model, if any, otherwise the caller's model.
+- The generated tool notes include the tier table, each role's resolved defaults (including per-role
+  overrides) and override syntax.
 - Validation: unknown tiers, unknown roles and unsupported effort values fail generation.
 
 Example `claude/roles.toml`:
@@ -151,9 +155,9 @@ for Claude. Codex has no aliases, so model updates there are explicit edits.
 2. Haiku 5.5 is tried for `fast`, with simple, narrow research questions only. Fallback is
    Sonnet 5.5 at low.
 3. Lead chooses the review tier and frequency per task, as described above.
-4. Open: Codex subagent override: if the spawn call cannot set a model, Lead can only choose among roles
-   in background work. In that case, keep tier overrides to interactive launches on Codex rather than
-   adding variant roles such as `developer-deep`.
+4. Codex subagent override (resolved 2026-11-13 by a Codex review): the spawn call accepts model and
+   effort with `fork_turns="none"`, but pinned custom-agent settings win. Codex subagent files
+   therefore leave the model to the caller.
 
 ## Verification
 

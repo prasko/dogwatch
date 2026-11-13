@@ -89,9 +89,10 @@ for Developer, Tester, Validator and Reviewer; `fast` for Researcher. The tool n
 map tiers to models and give the override syntax. Override per assignment and state
 the tier and reason in it:
 
-- Raise to `deep` for debugging with an unclear cause, security-sensitive or
-  concurrency-heavy changes, work that failed review twice, or a cross-cutting change
-  in an unfamiliar area.
+- Raise to `deep` for large changes, debugging with an unclear cause,
+  security-sensitive or concurrency-heavy changes, non-trivial algorithms, data
+  migrations or data-model changes, work that failed review twice, or a cross-cutting
+  change in an unfamiliar area.
 - Lower to `standard` or `fast` for documentation updates, mechanical edits and
   running checks. Doc-update workers use `standard`.
 - Use `special` only when the user asks, or propose it with a reason and get the
