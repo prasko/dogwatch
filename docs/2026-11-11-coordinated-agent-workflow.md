@@ -236,7 +236,8 @@ An agent role defines responsibility and the context in which work happens. A sk
 repeatable procedure that a suitable agent can perform. Stages, roles and conversations need not map
 one to one, and a role does not automatically require a custom agent definition.
 
-The workflow has seven agent roles, configured for both Codex and Claude Code:
+The workflow has seven stage roles, configured for both Codex and Claude Code, plus a Researcher
+role for bounded research:
 
 | Role | Responsibility and output | User interaction |
 | --- | --- | --- |
@@ -268,10 +269,11 @@ requiring the user's intent or preferences return through Lead for background wo
 interactive work. This preserves the tree:
 lead → scoper → reviewer, with no additional scoping role.
 
-Research is a planned reusable skill, with its definition deferred for now. Scopers, leads and
-architects can commission bounded research for scoping or design, normally in a background worker
-that the user does not interact with directly. That execution context does not introduce another
-agent role. Each worker reports findings, evidence and uncertainties to the context that assigned
+Research uses the Researcher role on a fast model: it answers simple, narrow questions with
+pointers and a factual summary and draws no conclusions. A fuller research skill remains deferred.
+Scopers, leads and architects can commission bounded research for scoping or design, normally in a background worker
+that the user does not interact with directly. The Researcher is a worker
+role, not a stage. Each worker reports findings, evidence and uncertainties to the context that assigned
 the question; that context owns the resulting scope or design decisions.
 
 The same lead and architect roles can operate at overall and individual-task levels in separate
@@ -337,7 +339,7 @@ starting a stack.
 
 ### Realizing the workflow in Herdr TUI
 
-The current setup generates all seven roles for Codex and Claude Code from shared instructions plus
+The current setup generates all eight roles for Codex and Claude Code from shared instructions plus
 a short per-tool note. Codex gets CLI profiles and custom subagent definitions: profile
 `agentic-scoper` and custom subagent `scoper` both use the Scoper role. Claude Code gets one agent
 per role, such as `agentic-scoper`, used both through `claude --agent` and as a subagent. Assignments explicitly state the interaction mode and user-question
@@ -521,7 +523,7 @@ same-tool review.
 Include background investigation that leads to interactive scoping and substantial work that starts
 interactively. Verify that Developer normally opens interactively, decisions and approvals survive
 handoffs, and the selected steps produce useful acceptance evidence.
-Cross-provider review remains a future option. The seven roles are configured for both tools; model and
-reasoning-level choices, cross-provider review configuration and skill packaging remain to be decided. Research and
-task-splitting skill definitions are deferred. Cross-worktree orchestration will follow once the
-small task workflow is useful in practice.
+The roles are configured for both tools, with model tiers described in
+[model selection](2026-11-13-model-selection.md). Cross-provider review, roles as skills for small
+tasks and the remaining skills are tracked in the [roadmap](2026-11-13-roadmap.md). Cross-worktree
+orchestration will follow once the small task workflow is useful in practice.

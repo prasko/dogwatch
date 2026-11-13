@@ -22,7 +22,8 @@ Role instructions live in `roles/`. `common.md` is included in every role, and
 mapping model tiers (`fast`, `standard`, `deep`, `special`) to concrete models, with
 optional per-role overrides. `roles/roles.toml` gives each role a default tier, and Lead
 can change the tier per assignment; see
-[the model selection doc](docs/2026-11-13-model-selection.md). Realizing roles as
+[the model selection doc](docs/2026-11-13-model-selection.md). Next steps are in
+[the roadmap](docs/2026-11-13-roadmap.md). Realizing roles as
 skills and task-splitting skills are deferred. There are no hooks, automatic review gates, or
 cross-provider calls; each tool reviews with its own Reviewer.
 
@@ -68,8 +69,8 @@ From a Herdr pane, start a Lead conversation in the project you want to work on:
 
 ```sh
 codex --profile agentic-lead -C /path/to/project
-# or
-cd /path/to/project && claude --agent agentic-lead
+# or, with a 1M compaction window for Lead
+cd /path/to/project && CLAUDE_CODE_AUTO_COMPACT_WINDOW=1000000 claude --agent agentic-lead
 ```
 
 Codex only delegates to subagents when the user or applicable AGENTS.md or skill
