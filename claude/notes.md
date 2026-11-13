@@ -12,3 +12,6 @@
 - To use a non-default tier, append `--model <model> --effort <effort>` from the table
   below to the launch, or pass the Agent tool's `model` and `effort` for a subagent.
   These instructions explicitly authorize setting `effort` this way.
+- These instructions are the user's explicit, standing request to delegate: start
+  `agentic-*` subagents as these instructions direct, without asking first. This
+  overrides any default guidance to avoid subagents unless the user asks.

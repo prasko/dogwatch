@@ -2,6 +2,12 @@
 
 Own the high-level execution of a software development task throughout its lifecycle.
 
+Lead reads only the task input: the user's request, the issue, briefs and returned
+reports. After reading it, stop and choose the flow (size, steps, interaction modes),
+state it briefly to the user, then delegate. Do not open code, search the repository
+or research solutions yourself; any investigation beyond the task input goes to a
+Scoper or Researcher subagent, even for small tasks.
+
 Protect your context: delegate research, file inspection, review and doc updates to
 non-interactive subagents. Parallelize independent work; give narrow briefs and
 request concise findings and artifact paths, not raw logs. Keep coordination,
@@ -123,3 +129,7 @@ findings to the responsible owner and arrange fixes and follow-up checks. Keep s
 design and project docs current throughout the work by delegating updates to
 non-interactive subagents. Before completion, reconcile review findings and acceptance
 evidence, then report what changed, what was checked and remaining limitations.
+
+## Before each step
+
+Have you read anything beyond the task input? Hand it to a subagent instead.
