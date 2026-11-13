@@ -1,0 +1,172 @@
+# Model and reasoning-level selection
+
+Status: Agreed 2026-11-13
+
+## Objective
+
+Run each role, and each kind of delegated work, on a model and reasoning level suited to it.
+Judgment-heavy roles get the strongest models; routine execution gets a capable workhorse; search
+and summarizing gets a fast model. Defaults come from configuration, so normal work needs no per-task
+choice, but Lead can raise or lower the tier for a specific assignment.
+
+Cross-provider review and realizing roles as skills are separate follow-ups. This design should not
+block either.
+
+## What the tools support
+
+Checked 2026-11-13 against Claude Code 2.1.322 and Codex 0.167.2.
+
+| | Claude Code | Codex |
+| --- | --- | --- |
+| Role default | Agent frontmatter `model` (alias such as `opus`, `sonnet`, `haiku`, `fable`, or a full ID) and `effort` | Custom agent and profile `model`, `model_reasoning_effort` |
+| Interactive session override | `claude --agent agentic-<role> --model <m> --effort <level>` | `codex --profile agentic-<role> -m <m> -c model_reasoning_effort=<level>` |
+| Per-subagent override | Agent tool `model` and `effort` parameters; `effort` only when instructions explicitly ask | To verify: whether the subagent spawn call accepts a model or effort override |
+| Effort levels | low, medium, high, xhigh, max | low, medium, high, xhigh, max, ultra (ultra adds automatic delegation) |
+
+Available models of interest:
+
+- Claude: Opus 5.5, Sonnet 5.5, Haiku 5.5, Fable 5.2.
+- Codex: `gpt-6-astra` (frontier), `gpt-6.1-sol` (workhorse), `gpt-6.1-terra`, `gpt-6-luna` (fast,
+  for easier tasks).
+
+## Overview
+
+Introduce four **tiers** that describe the kind of thinking needed, independent of the tool:
+
+| Tier | Use | Claude Code | Codex |
+| --- | --- | --- | --- |
+| `fast` | Locate and summarize; no conclusions | Haiku 5.5, low | `gpt-6-luna`, medium |
+| `standard` | Execute an agreed plan; routine judgment | Sonnet 5.5, high | `gpt-6.1-sol`, high |
+| `deep` | Coordination, requirements, design, review | Opus 5.5, medium | `gpt-6-astra`, high |
+| `special` | Exceptional difficulty; user-approved | Fable 5.2, medium | `gpt-6-astra`, xhigh |
+
+Each role gets a default tier in shared configuration. Each tool maps tiers to a concrete model and
+effort. The generated tool notes list that mapping, so Lead can override an assignment by tier
+without knowing model names. A model change then means editing one table per tool.
+
+## Detailed design
+
+### Role defaults
+
+| Role | Tier | Reasoning |
+| --- | --- | --- |
+| Lead | `deep` | Chooses the workflow, keeps decisions and approvals, reconciles results. Mistakes here spread. |
+| Scoper | `deep` | Separates requirements from solutions and finds what is missing. |
+| Architect | `deep` | Tradeoffs, interfaces and failure modes. |
+| Developer | `standard` | Works from an agreed plan; review catches what it misses. |
+| Tester | `standard` | Test design from given requirements and risks. |
+| Validator | `standard` | Runs scenarios and records evidence. |
+| Reviewer | `standard` | Lead chooses `standard` or `deep` per review; see below. |
+| Researcher (new) | `fast` | Search and summarize; see below. |
+
+The interactive and background versions of a role share a default. An interactive Developer still
+starts on `standard`; the user can override it at launch or ask Lead to.
+
+### Review tier and frequency
+
+Lead decides the review tier and how much review a task gets, and states the tier in each assignment
+that commissions or requires a review:
+
+- Large tasks with substantial design: `deep` review, starting early with the architecture or
+  design rather than the scope. Scope review stays optional, as described in the Lead role.
+- Smaller tasks: fewer reviews overall, typically one `standard` review of the combined
+  implementation and tests; `deep` only where the risk justifies it.
+
+The configured default is `standard`, so an assignment without a tier gets the cheaper review.
+
+### Researcher role
+
+Every role delegates research today, but research runs on whatever subagent and model happen to be
+used. A dedicated Researcher makes that cheap and predictable.
+
+- Takes only simple, narrowly scoped questions; the caller splits broader research into several
+  such questions. This keeps the `fast` tier within its abilities.
+- Finds code, documentation, configuration or web sources answering a bounded question.
+- Returns pointers and evidence: `path:line` references, short quotes, URLs and commands run.
+- Summarizes what it found and what it could not find. It does not recommend, decide or judge
+  correctness; conclusions stay with the caller.
+- Flags conflicting or uncertain evidence instead of resolving it.
+- Is read-only and never edits files.
+
+For Claude, the agent can also restrict tools in frontmatter (read, search and web tools). For Codex,
+read-only behavior stays an instruction, because the older sandbox keys conflict with the Herdr
+permission-profile setup.
+
+Built-in alternatives exist (Claude `Explore`, Codex's explorer agent). A custom role is preferred
+because its output contract and model are under our control and identical across tools.
+
+### Per-assignment overrides
+
+Lead states the tier in each assignment when it differs from the default, and uses the tool-specific
+override when launching. Guidance for Lead:
+
+- **Raise to `deep`**: debugging with an unclear cause, security-sensitive or concurrency-heavy
+  changes, work that failed review twice, or a cross-cutting change in an unfamiliar area.
+- **Lower to `standard` or `fast`**: documentation updates, mechanical edits, running checks and
+  collecting results. Doc-update subagents default to `standard` at medium effort.
+- **`special`** only when the user asks, or when Lead proposes it with a reason and the user agrees.
+- Never use Codex `ultra`; it delegates on its own and bypasses the workflow's delegation rules.
+- Record a non-default tier and the reason in the assignment, so drift stays visible.
+
+Other roles do not override tiers, except for choosing `fast` for their own research through the
+Researcher role.
+
+### Configuration and generation
+
+- `roles/roles.toml` adds `tier` to each role and defines the new `researcher` role.
+- `codex/roles.toml` and `claude/roles.toml` gain a `[tiers.<name>]` table with `model` and
+  `model_reasoning_effort` (Codex) or `effort` (Claude). Per-role tables stay, for exceptions that
+  bypass the tier.
+- The deploy script resolves each role's tier into concrete settings: the Claude frontmatter
+  `model`/`effort`, and the Codex agent and profile `model`/`model_reasoning_effort`.
+- The generated tool notes include the tier table and override syntax for that tool.
+- Validation: unknown tiers, unknown roles and unsupported effort values fail generation.
+
+Example `claude/roles.toml`:
+
+```toml
+[tiers.fast]
+model = "haiku"
+effort = "low"
+
+[tiers.standard]
+model = "sonnet"
+effort = "high"
+
+[tiers.deep]
+model = "opus"
+effort = "medium"
+
+[tiers.special]
+model = "fable"
+effort = "medium"
+```
+
+Aliases follow the latest model of each family automatically; full IDs pin a version. Prefer aliases
+for Claude. Codex has no aliases, so model updates there are explicit edits.
+
+## Decisions and open questions
+
+1. `standard` uses Sonnet 5.5 at high effort.
+2. Haiku 5.5 is tried for `fast`, with simple, narrow research questions only. Fallback is
+   Sonnet 5.5 at low.
+3. Lead chooses the review tier and frequency per task, as described above.
+4. Open: Codex subagent override: if the spawn call cannot set a model, Lead can only choose among roles
+   in background work. In that case, keep tier overrides to interactive launches on Codex rather than
+   adding variant roles such as `developer-deep`.
+
+## Verification
+
+- Deploy and confirm through `/agents` (Claude) and `/status` (Codex) that each role starts on the
+  intended model and effort, both interactively and as a subagent.
+- Confirm that `claude --agent` applies the frontmatter model and effort to the main session, and
+  that CLI flags override them.
+- Confirm `herdr agent start ... -- <flags>` passes model flags through.
+- Run one small task and compare speed and quality of `standard` against `deep` for Developer.
+
+## Sources
+
+- [Claude Code subagents](https://code.claude.com/docs/en/sub-agents)
+- [Claude Code CLI reference](https://code.claude.com/docs/en/cli-reference)
+- [Codex custom agents](https://learn.chatgpt.com/docs/agent-configuration/subagents)
+- [Codex configuration reference](https://learn.chatgpt.com/docs/config-file/config-reference)

@@ -27,7 +27,7 @@ class DeploymentTests(unittest.TestCase):
         self.addCleanup(quiet.__exit__, None, None, None)
 
     def test_profiles_and_agents_have_same_instructions_without_permission_overrides(self):
-        roles = {"lead", "scoper", "architect", "developer", "tester", "validator", "reviewer"}
+        roles = deploy.ROLES
         codex = self.rendered["codex"]
         self.assertEqual(set(codex), {
             path for role in roles
@@ -39,7 +39,10 @@ class DeploymentTests(unittest.TestCase):
             self.assertEqual(agent["name"], role)
             self.assertEqual(agent["developer_instructions"], profile["developer_instructions"])
             self.assertIn(f"# {role.title()}", profile["developer_instructions"])
-            self.assertEqual(set(profile), {"developer_instructions"})
+            self.assertEqual(set(profile),
+                             {"developer_instructions", "model", "model_reasoning_effort"})
+            self.assertEqual({k: v for k, v in agent.items()
+                              if k not in ("name", "description")}, profile)
             self.assertIn("## Codex notes", profile["developer_instructions"])
             self.assertNotIn("Claude", profile["developer_instructions"])
 
@@ -52,14 +55,50 @@ class DeploymentTests(unittest.TestCase):
             self.assertTrue(content.startswith(deploy.CLAUDE_MARKER))
             frontmatter, body = content.removeprefix("---\n").split("\n---\n\n", 1)
             fields = dict(line.split(": ", 1) for line in frontmatter.splitlines()[1:])
-            self.assertEqual(set(fields), {"name", "description"})
+            expected = {"name", "description", "model", "effort"}
+            self.assertEqual(set(fields), expected | ({"tools"} if role == "researcher" else set()))
             self.assertEqual(fields["name"], f'"agentic-{role}"')
-            self.assertIn("explicitly assigns", fields["description"])
+            self.assertIn("explicitly", fields["description"])
             codex = tomllib.loads(self.rendered["codex"][f"agentic-{role}.config.toml"])
             shared = codex["developer_instructions"].split("## Codex notes")[0]
             self.assertTrue(body.startswith(shared))
+            self.assertIn("### Model tiers", body)
             self.assertIn("## Claude Code notes", body)
             self.assertNotIn("Codex", body)
+
+    def test_tiers_resolve_to_models_and_role_overrides_win(self):
+        def settings(target, role):
+            if target == "codex":
+                return tomllib.loads(self.rendered["codex"][f"agentic-{role}.config.toml"])
+            frontmatter = self.rendered["claude"][f"agents/agentic-{role}.md"].split("\n---\n")[0]
+            return {key: value.strip('"') for key, value in
+                    (line.split(": ", 1) for line in frontmatter.splitlines()[2:])}
+        self.assertEqual(settings("claude", "lead")["model"], "opus")
+        self.assertEqual(settings("claude", "developer")["model"], "sonnet")
+        self.assertEqual(settings("claude", "developer")["effort"], "high")
+        self.assertEqual(settings("claude", "researcher")["model"], "haiku")
+        self.assertEqual(settings("codex", "reviewer")["model"], "gpt-6.1-sol")
+        self.assertEqual(settings("codex", "architect")["model"], "gpt-6-astra")
+
+        root = self.home / "src"
+        for path in ("roles", "codex", "claude"):
+            (root / path).mkdir(parents=True)
+            for source in (deploy.ROOT / path).iterdir():
+                (root / path / source.name).write_text(source.read_text())
+        config = root / "claude/roles.toml"
+        config.write_text(config.read_text().replace(
+            "[roles.lead]\n", '[roles.lead]\nmodel = "fable"\n'))
+        lead = deploy.render(root, ("claude",))["claude"]["agents/agentic-lead.md"]
+        self.assertIn('model: "fable"', lead)
+        self.assertIn('effort: "medium"', lead)
+
+        config.write_text(config.read_text().replace('effort = "low"', 'effort = "ultra"'))
+        with self.assertRaisesRegex(ValueError, "effort"):
+            deploy.render(root, ("claude",))
+        shared = root / "roles/roles.toml"
+        shared.write_text(shared.read_text().replace('tier = "fast"', 'tier = "quick"'))
+        with self.assertRaisesRegex(ValueError, "tier"):
+            deploy.render(root, ("codex",))
 
     def test_target_selection_and_claude_markers_are_managed(self):
         only = deploy.render(targets=("claude",))

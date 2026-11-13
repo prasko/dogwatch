@@ -1,23 +1,35 @@
-# Shared role descriptions. Role behavior lives in roles/*.md.
-# Tool-specific runtime settings live in codex/roles.toml and claude/roles.toml.
+# Shared role descriptions and default model tiers. Role behavior lives in roles/*.md.
+# Tiers (fast, standard, deep, special) map to concrete models in codex/roles.toml and
+# claude/roles.toml. See docs/2026-11-13-model-selection.md.
 
 [lead]
 description = "Own a task lifecycle: choose and adapt the workflow, scope and plan or delegate, retain decisions and track evidence."
+tier = "deep"
 
 [scoper]
 description = "Investigate scope in the background or work with the user on requirements; return findings or a brief."
+tier = "deep"
 
 [architect]
 description = "Develop a design interactively or in the background; return reviewed decisions and approval state."
+tier = "deep"
 
 [developer]
 description = "Implement the agreed plan, include tests and validation as assigned, and report reviewed results and design drift."
+tier = "standard"
 
 [tester]
 description = "Plan, author and run separately assigned unit and integration tests within existing authorization and chosen checkpoints."
+tier = "standard"
 
 [validator]
 description = "Exercise acceptance scenarios with fake data on a throwaway instance and return evidence for independent review."
+tier = "standard"
 
 [reviewer]
 description = "Independently review the assigned scope, design, code, tests or validation evidence for the current stage."
+tier = "standard"
+
+[researcher]
+description = "Answer a simple, narrow research question with pointers, quotes and a factual summary; draw no conclusions."
+tier = "fast"

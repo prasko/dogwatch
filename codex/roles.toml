@@ -1,10 +1,27 @@
-# Optional Codex runtime settings per role: model = "...", model_reasoning_effort = "...".
-# Omit both to inherit the session's selection. Descriptions live in roles/roles.toml.
+# Codex models per tier: model and model_reasoning_effort (low, medium, high, xhigh, max).
+# Never use "ultra": it delegates on its own. Per-role tables can override a tier's settings.
 
-[lead]
-[scoper]
-[architect]
-[developer]
-[tester]
-[validator]
-[reviewer]
+[tiers.fast]
+model = "gpt-6-luna"
+model_reasoning_effort = "medium"
+
+[tiers.standard]
+model = "gpt-6.1-sol"
+model_reasoning_effort = "high"
+
+[tiers.deep]
+model = "gpt-6-astra"
+model_reasoning_effort = "high"
+
+[tiers.special]
+model = "gpt-6-astra"
+model_reasoning_effort = "xhigh"
+
+[roles.lead]
+[roles.scoper]
+[roles.architect]
+[roles.developer]
+[roles.tester]
+[roles.validator]
+[roles.reviewer]
+[roles.researcher]

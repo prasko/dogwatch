@@ -9,3 +9,6 @@
   research yourself and keep returned output concise.
 - Start an interactive specialist through Herdr in an available shell pane:
   `herdr agent start <unique-name> --kind claude --pane <pane-id> -- --agent agentic-<role>`.
+- To use a non-default tier, append `--model <model> --effort <effort>` from the table
+  below to the launch, or pass the Agent tool's `model` and `effort` for a subagent.
+  These instructions explicitly authorize setting `effort` this way.

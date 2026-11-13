@@ -14,12 +14,16 @@ the same instructions.
 | Tester | Plan, author and run separately assigned unit and integration tests within the agreed authorization. |
 | Validator | Exercise acceptance scenarios on a throwaway instance and return reviewed evidence. |
 | Reviewer | Independently review the assigned artifact against its requirements and stage. |
+| Researcher | Answer simple, narrow research questions with pointers and a factual summary, without conclusions. |
 
 Role instructions live in `roles/`. `common.md` is included in every role, and
 `roles/roles.toml` holds the shared descriptions. Each tool directory (`codex/`,
 `claude/`) adds `notes.md`, appended to every role for that tool, and `roles.toml`
-for optional per-role model settings. No models are pinned by default. Research and
-task-splitting skills are deferred. There are no hooks, automatic review gates, or
+mapping model tiers (`fast`, `standard`, `deep`, `special`) to concrete models, with
+optional per-role overrides. `roles/roles.toml` gives each role a default tier, and Lead
+can change the tier per assignment; see
+[the model selection doc](docs/2026-11-13-model-selection.md). Realizing roles as
+skills and task-splitting skills are deferred. There are no hooks, automatic review gates, or
 cross-provider calls; each tool reviews with its own Reviewer.
 
 Interactive stage owners commission their own reviews. Background stage owners return
@@ -120,7 +124,7 @@ background scoping that leads to an interactive handoff. Verify Developer normal
 opens interactively, findings and questions reach Lead, approvals carry forward,
 and implementation stays within the agreed plan and checkpoints.
 
-To remove the setup, delete only the generated files (fourteen for Codex, seven for
+To remove the setup, delete only the generated files (sixteen for Codex, eight for
 Claude) after checking their markers, and restore any desired backups. Nothing is
 added to shell startup files, `config.toml` or `settings.json`. The old `Code/agents` examples are not deployment inputs;
 old project review hooks, if installed elsewhere, need separate removal.

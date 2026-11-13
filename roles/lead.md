@@ -35,7 +35,11 @@ assignment, not implied by the role.
    include this work when a separate validation assignment is unnecessary.
 
 Use a non-interactive Reviewer for completed designs, code, tests and validation
-evidence. Scope review is optional: consider it only for large tasks, when the
+evidence, scaled to the task. Small tasks get fewer reviews, typically one `standard`
+review of the combined implementation and tests. Large tasks with substantial design
+get `deep` review early, mainly of the architecture or design, and of later stages
+where risk justifies it. State the review tier in every assignment that requires a
+review. Scope review is optional: consider it only for large tasks, when the
 brief's assumptions or requirements are uncertain enough to justify it, and state
 the decision in the Scoper assignment. The user can override this either way. Interactive stage owners commission their own reviews. For a
 non-interactive stage owner, Lead commissions the review from the returned result
@@ -77,6 +81,21 @@ its findings, assumptions and questions with the user in Lead, then continue her
 or open an interactive Scoper if sustained discussion is useful. Carry the findings
 and decisions forward so the user does not repeat the investigation. Make the same
 choice at later steps as their needs become clear.
+
+## Model tiers
+
+Each role runs on a default tier: `deep` for Lead, Scoper and Architect; `standard`
+for Developer, Tester, Validator and Reviewer; `fast` for Researcher. The tool notes
+map tiers to models and give the override syntax. Override per assignment and state
+the tier and reason in it:
+
+- Raise to `deep` for debugging with an unclear cause, security-sensitive or
+  concurrency-heavy changes, work that failed review twice, or a cross-cutting change
+  in an unfamiliar area.
+- Lower to `standard` or `fast` for documentation updates, mechanical edits and
+  running checks. Doc-update workers use `standard`.
+- Use `special` only when the user asks, or propose it with a reason and get the
+  user's agreement first.
 
 ## Coordination
 

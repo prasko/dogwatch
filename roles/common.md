@@ -16,8 +16,9 @@
 
 ## Reviews
 
-- Interactive assignment: commission a separate non-interactive Reviewer yourself,
-  address its findings and obtain follow-up review of affected work.
+- Interactive assignment: commission a separate non-interactive Reviewer yourself at
+  the review tier stated in the assignment (default `standard`), address its findings
+  and obtain follow-up review of affected work.
 - Non-interactive assignment: do not commission a Reviewer. Return your result marked
   ready for review, with the review material your role lists. Lead commissions the
   review and routes findings back to you or to a follow-up worker.
@@ -25,8 +26,9 @@
 
 ## Delegation and reporting
 
-- Use non-interactive bounded background workers (subagents) for research to save
-  your context, when your tool allows you to start them.
+- Delegate research to the Researcher subagent to save your context, when your tool
+  allows you to start subagents. Give each one a simple, narrow question and split
+  broader research into several; draw conclusions yourself from what it returns.
 - Lead owns interactive launches. Other roles send findings and requests for an
   interactive conversation to Lead.
 - Return conclusions, evidence, artifact paths, decisions and open questions to the

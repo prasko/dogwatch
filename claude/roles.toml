@@ -1,10 +1,29 @@
-# Optional Claude Code runtime settings per role: model = "sonnet" | "opus" | "haiku" | "inherit"
-# or a full model ID. Omit to inherit the session's model. Descriptions live in roles/roles.toml.
+# Claude Code models per tier: model (alias such as "opus" or a full ID) and effort
+# (low, medium, high, xhigh, max). Per-role tables can override a tier's settings, and
+# set tools to restrict an agent's tools.
 
-[lead]
-[scoper]
-[architect]
-[developer]
-[tester]
-[validator]
-[reviewer]
+[tiers.fast]
+model = "haiku"
+effort = "low"
+
+[tiers.standard]
+model = "sonnet"
+effort = "high"
+
+[tiers.deep]
+model = "opus"
+effort = "medium"
+
+[tiers.special]
+model = "fable"
+effort = "medium"
+
+[roles.lead]
+[roles.scoper]
+[roles.architect]
+[roles.developer]
+[roles.tester]
+[roles.validator]
+[roles.reviewer]
+[roles.researcher]
+tools = "Read, Grep, Glob, Bash, WebFetch, WebSearch"
