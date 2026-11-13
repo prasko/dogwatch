@@ -1,7 +1,5 @@
 # Model and reasoning-level selection
 
-Status: Agreed 2026-11-13
-
 ## Objective
 
 Run each role, and each kind of delegated work, on a model and reasoning level suited to it.
@@ -9,12 +7,9 @@ Judgment-heavy roles get the strongest models; routine execution gets a capable 
 and summarizing gets a fast model. Defaults come from configuration, so normal work needs no per-task
 choice, but Lead can raise or lower the tier for a specific assignment.
 
-Cross-provider review and realizing roles as skills are separate follow-ups. This design should not
-block either.
-
 ## What the tools support
 
-Checked 2026-11-13 against Claude Code 2.1.322 and Codex 0.167.2.
+Checked against Claude Code 2.1.322 and Codex 0.167.2.
 
 | | Claude Code | Codex |
 | --- | --- | --- |
@@ -155,18 +150,9 @@ for Claude. Codex has no aliases, so model updates there are explicit edits.
 2. Haiku 5.5 is tried for `fast`, with simple, narrow research questions only. Fallback is
    Sonnet 5.5 at low.
 3. Lead chooses the review tier and frequency per task, as described above.
-4. Codex subagent override (resolved 2026-11-13 by a Codex review): the spawn call accepts model and
+4. Codex subagent override: the spawn call accepts model and
    effort with `fork_turns="none"`, but pinned custom-agent settings win. Codex subagent files
    therefore leave the model to the caller.
-
-## Verification
-
-- Deploy and confirm through `/agents` (Claude) and `/status` (Codex) that each role starts on the
-  intended model and effort, both interactively and as a subagent.
-- Confirm that `claude --agent` applies the frontmatter model and effort to the main session, and
-  that CLI flags override them.
-- Confirm `herdr agent start ... -- <flags>` passes model flags through.
-- Run one small task and compare speed and quality of `standard` against `deep` for Developer.
 
 ## Sources
 

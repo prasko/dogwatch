@@ -1,9 +1,9 @@
 # Roadmap
 
-Status: Current as of 2026-11-13. Update this page as items land or priorities change.
+Update this page as items land or priorities change.
 
-The design lives in [the coordinated agent workflow](2026-11-11-coordinated-agent-workflow.md) and
-[model selection](2026-11-13-model-selection.md). This page tracks what is next.
+The workflow is defined in [the role instructions](../roles/), and model tiers in
+[model selection](model-selection.md). This page tracks what is next.
 
 ## Current state
 
@@ -13,21 +13,6 @@ The design lives in [the coordinated agent workflow](2026-11-11-coordinated-agen
   Lead overrides per assignment. Codex subagent files leave the model to the spawning call.
 - Reviews are flattened for background stage owners; scope review is optional and Lead's call for
   large tasks. Each tool reviews with its own Reviewer.
-- A Codex review of the Codex side passed. Nothing is deployed yet.
-
-## Before further work: deploy and verify
-
-1. Deploy: `python3 scripts/deploy.py --dry-run`, then `python3 scripts/deploy.py`. This backs up
-   and replaces the existing Codex files and adds the Researcher and Claude agents.
-2. Claude: `/agents` lists the eight `agentic-*` agents with the intended model and effort, and
-   accepts the `effort` and `tools` frontmatter keys (`Grep` and `Glob` names included).
-3. Claude: `claude --agent agentic-lead` applies the agent's model and role prompt to the main
-   session, and CLAUDE.md still loads.
-4. Codex: `/status` in `codex --profile agentic-lead` shows the profile's model and effort; a
-   spawned subagent runs on the passed model.
-5. Herdr: Lead launches an interactive specialist for each tool with `-- --agent ...` or
-   `-- --profile ...`, and replies arrive through `herdr agent prompt`.
-6. Run one small task end to end in each tool, including a flattened review.
 
 ## Priorities
 
@@ -65,8 +50,7 @@ first and record what it repeatedly does.
 
 ### Later
 
-- Research and task-splitting skills, and cross-worktree orchestration
-  ([workflow design](2026-11-11-coordinated-agent-workflow.md)).
+- Research and task-splitting skills, and cross-worktree orchestration.
 - Codex compaction settings and model context sizes.
 
 ## Context and compaction (Claude)

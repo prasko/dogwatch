@@ -22,10 +22,9 @@ Role instructions live in `roles/`. `common.md` is included in every role, and
 mapping model tiers (`fast`, `standard`, `deep`, `special`) to concrete models, with
 optional per-role overrides. `roles/roles.toml` gives each role a default tier, and Lead
 can change the tier per assignment; see
-[the model selection doc](docs/2026-11-13-model-selection.md). Next steps are in
-[the roadmap](docs/2026-11-13-roadmap.md). Realizing roles as
-skills and task-splitting skills are deferred. There are no hooks, automatic review gates, or
-cross-provider calls; each tool reviews with its own Reviewer.
+[the model selection doc](docs/model-selection.md). Next steps are in
+[the roadmap](docs/roadmap.md). There are no hooks or automatic review gates;
+each tool reviews with its own Reviewer.
 
 Interactive stage owners commission their own reviews. Background stage owners return
 work ready for review, and Lead commissions the review and routes findings back.
@@ -51,7 +50,8 @@ selects one. For each role above it generates:
   and with `claude --agent`. `CLAUDE_CONFIG_DIR` or `--claude-home PATH` changes the
   destination. Descriptions tell Claude to use them only when assigned.
 
-Lead launches interactive agents with the Herdr skill. Codex reads it from
+Lead launches interactive agents with the Herdr skill, inside sandboxed agents set up as in
+[the Herdr sandbox doc](docs/herdr-sandbox.md). Codex reads it from
 `~/.agents/skills/herdr`; link it for Claude with
 `ln -s ~/.agents/skills/herdr ~/.claude/skills/herdr`. Edit the source files here and
 redeploy.
@@ -110,8 +110,7 @@ See [the Lead role](roles/lead.md) for the workflow.
 
 Profiles and `--agent` apply only to sessions started with them; they do not
 automatically turn every app conversation into Lead. Project configuration can override profile
-settings. Existing project-local role definitions may affect role discovery; verify
-which instructions load when adopting a project with old reviewer configuration.
+settings.
 
 ## Maintain and verify
 
@@ -123,16 +122,11 @@ python3 scripts/deploy.py --check
 
 Tests use temporary destinations and cover generated TOML and Claude agent files, target selection, deployment conflicts,
 backups, repeat deployment, and preservation of unrelated configuration. `--check`
-reports whether the installed files exactly match the current sources. These checks
-do not prove model behavior: try small, medium and large task flows, including
-background scoping that leads to an interactive handoff. Verify Developer normally
-opens interactively, findings and questions reach Lead, approvals carry forward,
-and implementation stays within the agreed plan and checkpoints.
+reports whether the installed files exactly match the current sources.
 
 To remove the setup, delete only the generated files (sixteen for Codex, eight for
 Claude) after checking their markers, and restore any desired backups. Nothing is
-added to shell startup files, `config.toml` or `settings.json`. The old `Code/agents` examples are not deployment inputs;
-old project review hooks, if installed elsewhere, need separate removal.
+added to shell startup files, `config.toml` or `settings.json`.
 
 ## Sources
 
