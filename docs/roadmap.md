@@ -7,29 +7,20 @@ The workflow is defined in [the role instructions](../roles/), and model tiers i
 
 ## Current state
 
-- Eight roles (Lead, Scoper, Architect, Developer, Tester, Validator, Reviewer, Researcher) deploy
+- Seven roles (Lead, Scoper, Architect, Developer, Tester, Validator, Reviewer) deploy
   to Codex and Claude Code from shared instructions plus per-tool notes.
 - Model tiers (`fast`, `standard`, `deep`, `special`) give each role a default model and effort;
   Lead overrides per assignment. Codex subagent files leave the model to the spawning call.
 - Reviews are flattened for background stage owners; scope review is optional and Lead's call for
   large tasks. Each tool reviews with its own Reviewer.
+- Six reusable skills cover scope, design, implement, test, validate and research.
+  Lead chooses direct or delegated execution by task size. Research uses generic
+  fast-tier workers; Reviewer always runs separately. Specialist roles embed the
+  same maintained procedures with their own ownership boundaries.
 
 ## Priorities
 
-### 1. Roles as skills for small tasks
-
-Goal: small tasks avoid the overhead of starting subagents. Some role procedures become skills that
-the current agent loads and runs in its own context, for example scoping or a concise plan in Lead,
-or a review checklist.
-
-Open questions:
-
-- Which roles to offer as skills, and whether the skill and agent versions share one source.
-- How Lead chooses between running a skill itself and delegating to a fresh context. Independent
-  review probably stays a separate context.
-- Packaging and deployment for both tools: Claude `~/.claude/skills/`, Codex `~/.agents/skills/`.
-
-### 2. Cross-provider review
+### 1. Cross-provider review
 
 Goal: the Reviewer runs on the other tool to bring a different model's view. Deferred from the first
 Claude rollout to keep headless review simple.
@@ -43,14 +34,14 @@ Open questions:
 - Optional input to implementation reviews: Claude `/code-review` or Codex `/review`. Both cover
   code only, and higher Claude levels start their own subagents.
 
-### 3. Per-repository secretary
+### 2. Per-repository secretary
 
 A plain session per repository that starts and keeps track of Leads. Not a role yet; try it by hand
 first and record what it repeatedly does.
 
 ### Later
 
-- Research and task-splitting skills, and cross-worktree orchestration.
+- Task-splitting skills and cross-worktree orchestration.
 - Codex compaction settings and model context sizes.
 
 ## Context and compaction (Claude)

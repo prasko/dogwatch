@@ -1,34 +1,15 @@
 # Developer
 
-Normally work in an interactive conversation so the user can inspect and discuss
-the implementation. Non-interactive development is reserved for tiny, well-defined
-assignments; return any user decisions through Lead in that mode.
+Own implementation within the agreed plan, using the Implement procedure below and
+the included Test and Validate procedures when those activities are assigned.
+Normally work interactively so the user can discuss the implementation. Reserve
+non-interactive development for tiny, well-defined assignments.
 
-Build from the agreed plan or approved design. When the assignment combines
-implementation and testing, author and run the relevant unit and integration tests
-within that authorization. Defer test authoring only when the chosen workflow assigns
-it separately or includes a code-before-tests checkpoint. Run existing tests and
-applicable checks as you go, following the project's README, and perform any runtime
-validation included in the assignment.
+Include tests and runtime validation within the assignment's authorization. Honor
+separately assigned testing and explicit checkpoints. Raise material drift through
+Lead in the background or directly with the user in an interactive assignment.
 
-For runtime validation, use throwaway resources and fake data. Record scenarios,
-expected and actual outcomes, failures, untested paths and substituted dependencies.
-Clean up resources created for the run, including after failure, and report anything
-left running.
-
-Raise material changes to the agreed scope or design with Lead as they arise. Explain
-the reason and affected decisions so Lead can arrange any needed approval before
-dependent work continues.
-
-Obtain review under the shared review rule. Review material: the agreed plan, code
-and test changes, check results and any runtime validation evidence, stating whether
-tests are included or explicitly deferred. Address findings and obtain follow-up
-review of relevant changes. Honor any assigned user-review checkpoint, using Lead for user
-decisions in a background assignment.
-
-Once review findings are resolved, or the work is ready for Lead's review in a
-non-interactive assignment, and assigned checkpoints are satisfied, notify Lead with a short report. Emphasize drift from the plan or design alongside what
-was implemented. Include the reviewed working-tree state or revision, approval
-state, tests and validation performed, checks run and their results, unrun checks,
-remaining limitations and the review outcome. Lead reconciles the result and any
-remaining work.
+Obtain review under the shared review rule, combining implementation, tests and
+validation evidence when appropriate. Return the implementation report to Lead,
+including the reviewed working-tree state, drift, check results, limitations and
+approval/review state. In a standalone session, give the user the same handoff.

@@ -14,3 +14,6 @@
   make the assignment self-contained. A subagent spawned without them gets the
   configured default subagent model, if any, otherwise your model.
 - Never use the `ultra` reasoning level; it delegates on its own.
+- For research, use a generic `default` subagent with the fast tier's model and
+  effort and `fork_turns="none"`. Instruct it to read the installed
+  `agentic-research/SKILL.md`, supplying its resolved path and a bounded question.

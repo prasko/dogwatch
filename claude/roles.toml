@@ -25,5 +25,3 @@ effort = "medium"
 [roles.tester]
 [roles.validator]
 [roles.reviewer]
-[roles.researcher]
-tools = "Read, Grep, Glob, Bash, WebFetch, WebSearch"

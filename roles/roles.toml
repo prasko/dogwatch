@@ -7,29 +7,25 @@ description = "Own a task lifecycle: choose and adapt the workflow, scope and pl
 tier = "deep"
 
 [scoper]
-description = "Investigate scope in the background or work with the user on requirements; return findings or a brief."
+description = "Own scope investigation or requirements discussion; return findings or a brief and unresolved decisions. May write scope docs; cannot edit production code or tests."
 tier = "deep"
 
 [architect]
-description = "Develop a design interactively or in the background; return reviewed decisions and approval state."
+description = "Own design and its review; return a design document, decisions and approval state. May write design docs; cannot implement or edit production code or tests."
 tier = "deep"
 
 [developer]
-description = "Implement the agreed plan, include tests and validation as assigned, and report reviewed results and design drift."
+description = "Own implementation within the agreed plan; may edit production code and assigned tests and fixtures. Return changes, check results, design drift and review state."
 tier = "standard"
 
 [tester]
-description = "Plan, author and run separately assigned unit and integration tests within existing authorization and chosen checkpoints."
+description = "Own separately assigned unit and integration testing; may edit tests and test fixtures, not production code. Return coverage, results and gaps; route production defects to the implementation owner."
 tier = "standard"
 
 [validator]
-description = "Exercise acceptance scenarios with fake data on a throwaway instance and return evidence for independent review."
+description = "Own acceptance validation; may create disposable resources and validation fixtures, not fix production code. Return a dated evidence report and cleanup status; route defects to the implementation owner."
 tier = "standard"
 
 [reviewer]
-description = "Independently review the assigned scope, design, code, tests or validation evidence for the current stage."
+description = "Independently assess the assigned artifact in a separate context; return findings with severity, evidence and limitations. Cannot edit artifacts, fix code or write tests; review does not grant user approval."
 tier = "standard"
-
-[researcher]
-description = "Answer a simple, narrow research question with pointers, quotes and a factual summary; draw no conclusions."
-tier = "fast"

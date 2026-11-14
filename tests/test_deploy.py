@@ -1,7 +1,11 @@
 from contextlib import redirect_stdout
 import importlib.util
 import io
+import json
 from pathlib import Path
+import shutil
+import subprocess
+import sys
 import tempfile
 import tomllib
 import unittest
@@ -32,7 +36,7 @@ class DeploymentTests(unittest.TestCase):
         self.assertEqual(set(codex), {
             path for role in roles
             for path in (f"agents/{role}.toml", f"agentic-{role}.config.toml")
-        })
+        } | {f"skills/agentic-{skill}/SKILL.md" for skill in deploy.SKILLS})
         for role in roles:
             agent = tomllib.loads(codex[f"agents/{role}.toml"])
             profile = tomllib.loads(codex[f"agentic-{role}.config.toml"])
@@ -42,21 +46,22 @@ class DeploymentTests(unittest.TestCase):
             self.assertEqual(set(profile),
                              {"developer_instructions", "model", "model_reasoning_effort"})
             self.assertEqual(set(agent), {"name", "description", "developer_instructions"})
-            self.assertIn("| researcher | `fast` | gpt-6-luna | medium |", agent["developer_instructions"])
+            self.assertIn("| `fast` | gpt-6-luna | medium |", agent["developer_instructions"])
             self.assertIn("## Codex notes", profile["developer_instructions"])
             self.assertNotIn("Claude", profile["developer_instructions"])
 
     def test_claude_agents_have_frontmatter_and_shared_instructions(self):
         roles = deploy.ROLES
         claude = self.rendered["claude"]
-        self.assertEqual(set(claude), {f"agents/agentic-{role}.md" for role in roles})
+        self.assertEqual(set(claude), {f"agents/agentic-{role}.md" for role in roles}
+                         | {f"skills/agentic-{skill}/SKILL.md" for skill in deploy.SKILLS})
         for role in roles:
             content = claude[f"agents/agentic-{role}.md"]
             self.assertTrue(content.startswith(deploy.CLAUDE_MARKER))
             frontmatter, body = content.removeprefix("---\n").split("\n---\n\n", 1)
             fields = dict(line.split(": ", 1) for line in frontmatter.splitlines()[1:])
             expected = {"name", "description", "model", "effort"}
-            self.assertEqual(set(fields), expected | ({"tools"} if role == "researcher" else set()))
+            self.assertEqual(set(fields), expected)
             self.assertEqual(fields["name"], f'"agentic-{role}"')
             self.assertIn("explicitly", fields["description"])
             codex = tomllib.loads(self.rendered["codex"][f"agentic-{role}.config.toml"])
@@ -65,6 +70,17 @@ class DeploymentTests(unittest.TestCase):
             self.assertIn("### Model tiers", body)
             self.assertIn("## Claude Code notes", body)
             self.assertNotIn("Codex", body)
+
+    def test_lead_receives_the_same_contracts_as_agent_descriptions(self):
+        lead = tomllib.loads(self.rendered["codex"]["agentic-lead.config.toml"])
+        claude_lead = self.rendered["claude"]["agents/agentic-lead.md"]
+        for role in deploy.ROLES:
+            agent = tomllib.loads(self.rendered["codex"][f"agents/{role}.toml"])
+            if role != "lead":
+                contract = f"- **{role.title()}:** {agent['description']}"
+                self.assertIn(contract, lead["developer_instructions"])
+                self.assertIn(contract, claude_lead)
+                self.assertNotIn("## Delegated role contracts", agent["developer_instructions"])
 
     def test_tiers_resolve_to_models_and_role_overrides_win(self):
         def settings(target, role):
@@ -76,15 +92,13 @@ class DeploymentTests(unittest.TestCase):
         self.assertEqual(settings("claude", "lead")["model"], "opus")
         self.assertEqual(settings("claude", "developer")["model"], "sonnet")
         self.assertEqual(settings("claude", "developer")["effort"], "high")
-        self.assertEqual(settings("claude", "researcher")["model"], "haiku")
+        self.assertEqual(deploy._load_runtime(deploy.ROOT, "claude")[1]["fast"]["model"], "haiku")
         self.assertEqual(settings("codex", "reviewer")["model"], "gpt-6.1-sol")
         self.assertEqual(settings("codex", "architect")["model"], "gpt-6-astra")
 
         root = self.home / "src"
-        for path in ("roles", "codex", "claude"):
-            (root / path).mkdir(parents=True)
-            for source in (deploy.ROOT / path).iterdir():
-                (root / path / source.name).write_text(source.read_text())
+        for path in ("roles", "codex", "claude", "skills"):
+            shutil.copytree(deploy.ROOT / path, root / path)
         config = root / "claude/roles.toml"
         config.write_text(config.read_text().replace(
             "[roles.lead]\n", '[roles.lead]\nmodel = "fable"\n'))
@@ -97,7 +111,7 @@ class DeploymentTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "effort"):
             deploy.render(root, ("claude",))
         shared = root / "roles/roles.toml"
-        shared.write_text(shared.read_text().replace('tier = "fast"', 'tier = "quick"'))
+        shared.write_text(shared.read_text().replace('tier = "deep"', 'tier = "quick"'))
         with self.assertRaisesRegex(ValueError, "tier"):
             deploy.render(root, ("codex",))
 
@@ -167,6 +181,91 @@ class DeploymentTests(unittest.TestCase):
             deploy.deploy(self.outputs, replace=True)
         self.assertEqual(target.read_text(), "keep me")
         self.assertFalse((self.destination / "agents").exists())
+
+    def test_skills_are_portable_and_roles_embed_the_canonical_procedure(self):
+        for skill in deploy.SKILLS:
+            relative = f"skills/agentic-{skill}/SKILL.md"
+            source = (deploy.ROOT / relative).read_text()
+            rendered = self.rendered["codex"][relative]
+            self.assertEqual(rendered, self.rendered["claude"][relative])
+            self.assertEqual(rendered.replace(deploy.MARKER, "", 1), source)
+            frontmatter, body = rendered[4:].split("\n---\n", 1)
+            fields = dict(line.split(":", 1) for line in frontmatter.splitlines()
+                          if not line.startswith("#"))
+            self.assertEqual(json.loads(fields["name"]), f"agentic-{skill}")
+            self.assertTrue(json.loads(fields["description"]))
+            self.assertEqual(set(fields), {"name", "description"})
+            self.assertNotIn("### Model tiers", body)
+            for role, skills in deploy.ROLE_SKILLS.items():
+                if skill in skills:
+                    profile = tomllib.loads(self.rendered["codex"][f"agentic-{role}.config.toml"])
+                    self.assertIn(body.strip(), profile["developer_instructions"])
+            lead = tomllib.loads(self.rendered["codex"]["agentic-lead.config.toml"])
+            self.assertNotIn(body.strip(), lead["developer_instructions"])
+
+    def test_skill_collision_preflights_roles_and_skill_backup_preserves_bytes(self):
+        path = self.destination / "skills/agentic-test/SKILL.md"
+        path.parent.mkdir(parents=True)
+        original = b"---\r\nname: mine\r\n---\r\n"
+        path.write_bytes(original)
+        with self.assertRaisesRegex(ValueError, "Unmanaged file"):
+            deploy.deploy(self.outputs)
+        self.assertFalse((self.destination / "agents").exists())
+        deploy.deploy(self.outputs, replace=True)
+        self.assertEqual(next(path.parent.glob("SKILL.md.bak-*")).read_bytes(), original)
+        self.assertEqual(deploy.deploy(self.outputs, check=True), 0)
+
+    def test_retirement_is_scoped_backed_up_and_idempotent(self):
+        retired = deploy.retired_paths(self.homes)
+        for path in retired:
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_bytes((deploy.LEGACY_MARKER + "old role\r\n").encode())
+        original = retired[0].read_bytes()
+        deploy.deploy(self.outputs, retired=retired, dry_run=True)
+        self.assertTrue(all(path.exists() for path in retired))
+        self.assertEqual(deploy.deploy(self.outputs, retired=retired, check=True), 1)
+        deploy.deploy(self.outputs, retired=retired)
+        self.assertTrue(all(not path.exists() for path in retired))
+        self.assertEqual(next(retired[0].parent.glob("researcher.toml.bak-*")).read_bytes(), original)
+        self.assertEqual(deploy.deploy(self.outputs, retired=retired, check=True), 0)
+        backups = set(self.home.rglob("*.bak-*"))
+        deploy.deploy(self.outputs, retired=retired)
+        self.assertEqual(set(self.home.rglob("*.bak-*")), backups)
+        self.assertEqual(deploy.retired_paths(self.homes, ("claude",)), (retired[-1],))
+
+    def test_unmanaged_retired_file_is_preserved_even_with_replace(self):
+        path = deploy.retired_paths(self.homes, ("claude",))[0]
+        path.parent.mkdir(parents=True)
+        path.write_text("user agent\n")
+        deploy.deploy(self.outputs, retired=(path,), replace=True)
+        self.assertEqual(path.read_text(), "user agent\n")
+        self.assertFalse(list(path.parent.glob("agentic-researcher.md.bak-*")))
+
+    def test_retired_symlink_aborts_before_any_writes(self):
+        path = deploy.retired_paths(self.homes)[0]
+        path.parent.mkdir(parents=True)
+        target = self.home / "unrelated"
+        target.write_text(deploy.LEGACY_MARKER + "keep me")
+        path.symlink_to(target)
+        with self.assertRaisesRegex(ValueError, "symlink"):
+            deploy.deploy(self.outputs, retired=(path,))
+        self.assertFalse((self.destination / "agents/lead.toml").exists())
+        self.assertTrue(target.read_text().endswith("keep me"))
+
+    def test_cli_custom_home_keeps_skills_and_retirement_in_selected_target(self):
+        retired = deploy.retired_paths(self.homes)[0]
+        retired.parent.mkdir(parents=True)
+        retired.write_text(deploy.LEGACY_MARKER + "old")
+        command = [sys.executable, str(deploy.ROOT / "scripts/deploy.py"),
+                   "--target", "codex", "--codex-home", str(self.destination),
+                   "--claude-home", str(self.homes["claude"])]
+        result = subprocess.run(command, capture_output=True, text=True)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertFalse(retired.exists())
+        self.assertTrue((self.destination / "skills/agentic-research/SKILL.md").exists())
+        self.assertFalse(self.homes["claude"].exists())
+        result = subprocess.run(command + ["--check"], capture_output=True, text=True)
+        self.assertEqual(result.returncode, 0, result.stderr)
 
 
 if __name__ == "__main__":

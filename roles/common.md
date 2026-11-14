@@ -6,6 +6,8 @@
   do not infer it from the role or session name. Clarify missing details with the
   caller when needed, while continuing work that does not depend on them.
 - Read applicable global and project agent instructions; the tool notes below say where.
+- Skills supply procedures without changing your role, edit boundaries or existing
+  authorization. Use included procedures directly; load other skills only as needed.
 - Save any docs in a suitable location using YYYY-MM-DD-title.md format.
 - Follow the assignment's workflow and approval boundaries. An agreed plan may cover
   implementation, tests and relevant validation. Preserve valid approvals; request
@@ -16,6 +18,9 @@
 
 ## Reviews
 
+- Reviewer always runs in a separate context. Self-checks do not replace it. Lead
+  executing stages directly commissions review itself, normally one combined review
+  for a small task. Scope review remains optional; each skill is not a review gate.
 - Interactive assignment: commission a separate non-interactive Reviewer yourself at
   the review tier stated in the assignment (default `standard`), address its findings
   and obtain follow-up review of affected work.
@@ -26,9 +31,11 @@
 
 ## Delegation and reporting
 
-- Delegate research to the Researcher subagent to save your context, when your tool
-  allows you to start subagents. Give each one a simple, narrow question and split
-  broader research into several; draw conclusions yourself from what it returns.
+- Delegate bounded research to a generic fast-tier subagent using `agentic-research`
+  when your tool allows delegation. Supply the skill's resolved path, a narrow
+  question, source locations and return channel. Split broad questions into smaller
+  assignments and interpret the findings yourself. If delegation is unavailable,
+  use the skill in your current context. There is no dedicated Researcher role.
 - Lead owns interactive launches. Other roles send findings and requests for an
   interactive conversation to Lead.
 - Return conclusions, evidence, artifact paths, decisions and open questions to the

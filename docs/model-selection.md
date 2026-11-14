@@ -52,7 +52,7 @@ without knowing model names. A model change then means editing one table per too
 | Tester | `standard` | Test design from given requirements and risks. |
 | Validator | `standard` | Runs scenarios and records evidence. |
 | Reviewer | `standard` | Lead chooses `standard` or `deep` per review; see below. |
-| Researcher (new) | `fast` | Search and summarize; see below. |
+| Generic research worker | `fast` | Use the research skill for bounded factual questions. |
 
 The interactive and background versions of a role share a default. An interactive Developer still
 starts on `standard`; the user can override it at launch or ask Lead to.
@@ -69,26 +69,17 @@ that commissions or requires a review:
 
 The configured default is `standard`, so an assignment without a tier gets the cheaper review.
 
-### Researcher role
+### Research skill and generic workers
 
-Every role delegates research today, but research runs on whatever subagent and model happen to be
-used. A dedicated Researcher makes that cheap and predictable.
+`agentic-research` supplies the factual research procedure without a dedicated role.
+Lead and specialists normally delegate bounded questions to generic fast-tier agents,
+including when Lead performs all delivery stages itself. The caller supplies the
+question, source locations, skill path and return channel, and interprets the findings.
 
-- Takes only simple, narrowly scoped questions; the caller splits broader research into several
-  such questions. This keeps the `fast` tier within its abilities.
-- Finds code, documentation, configuration or web sources answering a bounded question.
-- Returns pointers and evidence: `path:line` references, short quotes, URLs and commands run.
-- Summarizes what it found and what it could not find. It does not recommend, decide or judge
-  correctness; conclusions stay with the caller.
-- Flags conflicting or uncertain evidence instead of resolving it.
-- Is read-only and never edits files.
-
-For Claude, the agent can also restrict tools in frontmatter (read, search and web tools). For Codex,
-read-only behavior stays an instruction, because the older sandbox keys conflict with the Herdr
-permission-profile setup.
-
-Built-in alternatives exist (Claude `Explore`, Codex's explorer agent). A custom role is preferred
-because its output contract and model are under our control and identical across tools.
+Use Codex's `default` agent or Claude's `general-purpose` agent with the configured
+fast model and effort. Research stays read-only and returns pointers, evidence,
+uncertainties and a concise factual summary. A caller can use the same skill directly
+when delegation is unavailable. Loading a skill does not change the current model.
 
 ### Per-assignment overrides
 
@@ -98,17 +89,18 @@ override when launching. Guidance for Lead:
 - **Raise to `deep`**: debugging with an unclear cause, security-sensitive or concurrency-heavy
   changes, work that failed review twice, or a cross-cutting change in an unfamiliar area.
 - **Lower to `standard` or `fast`**: documentation updates, mechanical edits, running checks and
-  collecting results. Doc-update subagents default to `standard` at medium effort.
+  collecting results. Doc-update subagents default to `standard`.
 - **`special`** only when the user asks, or when Lead proposes it with a reason and the user agrees.
 - Never use Codex `ultra`; it delegates on its own and bypasses the workflow's delegation rules.
 - Record a non-default tier and the reason in the assignment, so drift stays visible.
 
-Other roles do not override tiers, except for choosing `fast` for their own research through the
-Researcher role.
+Other roles do not override tiers, except for choosing `fast` for their own generic
+research workers.
 
 ### Configuration and generation
 
-- `roles/roles.toml` adds `tier` to each role and defines the new `researcher` role.
+- `roles/roles.toml` defines the seven roles and their default tiers. The fast tier
+  remains available for generic research workers without a Researcher role entry.
 - `codex/roles.toml` and `claude/roles.toml` gain a `[tiers.<name>]` table with `model` and
   `model_reasoning_effort` (Codex) or `effort` (Claude). Per-role tables stay, for exceptions that
   bypass the tier.

@@ -7,11 +7,14 @@
   subagent. Non-interactive reviews use `agentic-reviewer`.
 - A subagent may be unable to start its own subagents. In that case, do bounded
   research yourself and keep returned output concise.
+- For research, use a generic `general-purpose` subagent with the fast tier's model
+  and effort. Instruct it to read the installed `agentic-research/SKILL.md`, supplying
+  its resolved path and a bounded question; no custom Researcher agent is needed.
 - Start an interactive specialist through Herdr in an available shell pane:
   `herdr agent start <unique-name> --kind claude --pane <pane-id> -- --agent agentic-<role>`.
 - To use a non-default tier, append `--model <model> --effort <effort>` from the table
   below to the launch, or pass the Agent tool's `model` and `effort` for a subagent.
   These instructions explicitly authorize setting `effort` this way.
 - These instructions are the user's explicit, standing request to delegate: start
-  `agentic-*` subagents as these instructions direct, without asking first. This
+  role subagents and generic research workers as these instructions direct, without asking first. This
   overrides any default guidance to avoid subagents unless the user asks.
