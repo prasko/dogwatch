@@ -13,7 +13,9 @@ The workflow is defined in [the role instructions](../roles/), and model tiers i
   Lead overrides per assignment. Codex subagent files leave the model to the spawning call.
 - Reviews are flattened for background stage owners; scope review is optional and Lead's call for
   large tasks. Each tool reviews with its own Reviewer.
-- Six reusable skills cover scope, design, implement, test, validate and research.
+- Seven reusable skills cover scope, design, implement, test, validate, research
+  and setup feedback. Setup feedback reaches an existing agent in this repository
+  through Herdr; repo-local `AGENTS.md` defines receiver behavior.
   Lead chooses direct or delegated execution by task size. Research uses generic
   fast-tier workers; Reviewer always runs separately. Specialist roles embed the
   same maintained procedures with their own ownership boundaries.
