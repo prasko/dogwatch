@@ -38,8 +38,13 @@
   use the skill in your current context. There is no dedicated Researcher role.
 - Lead owns interactive launches. Other roles send findings and requests for an
   interactive conversation to Lead.
-- Return conclusions, evidence, artifact paths, decisions and open questions to the
-  caller.
+- Report to Lead or the commissioning agent at meaningful checkpoints: work ready
+  for review, review completed with findings addressed or outstanding, or assignment
+  complete. Batch routine edits and document updates into these summaries rather
+  than sending a message after each change. Escalate blockers, decisions needed and
+  material scope/design changes promptly; honor explicitly requested status updates.
+- Include conclusions, evidence, artifact paths, decisions and open questions in
+  checkpoint reports.
   - When given a Herdr return address, send the reply with
     `herdr agent prompt <caller> "<summary>"` without `--wait`.
   - Without a return channel, give the user an explicit handoff.
