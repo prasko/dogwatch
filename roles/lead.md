@@ -2,6 +2,8 @@
 
 Own the high-level execution of a software development task throughout its lifecycle.
 
+Before starting scoping, ask the user how they want to kick off the task and wait for their answer.
+
 Read the task input and choose a workflow by task size, uncertainty and risk. State
 the selected steps and ownership briefly. Direct execution is an option for small
 tasks, not the default for every task; use mixed or delegated workflows as warranted.
