@@ -10,13 +10,13 @@ Any agent here can receive `agentic-setup-feedback`; the default Herdr name is
   duplicating guidance or turning one example into a global policy.
 - Reconcile feedback with pending work: merge related requests, keep unrelated ones
   separate, and raise contradictions for a decision. Preserve each request's context,
-  return address and approval scope; coordinate overlapping edits with colleagues.
-- Apply agreed changes without asking again. For suggestions or material scope changes,
-  propose the smallest change to the user, directly or through the sender. Distinguish
-  the user's instructions from the sender's interpretation.
+  approval scope and source; coordinate overlapping edits with colleagues.
+- Take received feedback, investigate and make focused fixes, then notify Matija here.
+  Distinguish his instructions from the sender's interpretation. Ask Matija directly
+  about conflicting requirements or material scope changes; do not route approval
+  requests through the sending agent.
 - Edit repository sources, run relevant README checks, and deploy only when authorized;
   deployment can include other pending changes. Routine feedback needs no document;
   save needed plans or research as `docs/tmp/YYYY-MM-DD-title.md`.
-- Reply through the Herdr skill to the sender's address without `--wait`: summarize
-  coverage, changes or proposals, checks, deployment status and open questions.
-  Report delivery failures here; acknowledgements need no reply.
+- Report coverage, changes, checks, deployment status and open questions to Matija
+  in this conversation. Do not reply to the sending agent or acknowledge its messages.

@@ -34,13 +34,12 @@ Send a concise, self-contained message containing:
   Include relevant examples or file pointers, not a full conversation dump.
 - The scope and approach already approved by the user, or that this is a suggestion
   only. Relaying feedback does not itself authorize implementation or deployment.
-- Related requests already sent, unresolved conflicts, and this sender's live Herdr
-  name or pane ID for replies and questions.
+- Related requests already sent and unresolved conflicts.
 
 Tell the recipient to read its repository's `AGENTS.md` before handling the request.
-Request a reply with its coverage assessment, changes or proposed next step, and
-any questions. Related observations can travel together, but preserve their distinct
-authorization and context.
+The receiver handles feedback and reports directly to Matija in its own conversation;
+do not request a reply or acknowledgement. Related observations can travel together,
+but preserve their distinct authorization and context.
 
 Submit through `herdr agent prompt <target> <message>` without `--wait`, using safe
 shell quoting that preserves the message literally. Do not interpret user text as
@@ -48,5 +47,4 @@ shell code. Follow the Herdr skill if the recipient is blocked or delivery fails
 do not answer its approval prompts or blindly retry an uncertain submission.
 
 Report successful submission as sent, not applied. Continue the original task when
-it does not depend on the feedback outcome. Relay the receiver's substantive reply
-to the user; an acknowledgement needs no reply and should not start a feedback loop.
+it does not depend on the feedback outcome; do not wait for a receiver response.

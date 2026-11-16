@@ -14,8 +14,13 @@ For substantial work, build the dated design document in phases at the establish
 location. Start with objective/background, an overview and the big open questions.
 Let the user review that first and settle the main direction before adding details.
 Expand the detailed design incrementally as decisions are made, keeping each phase
-small enough to review. Place key models, methods and affected files toward the end;
-avoid large code dumps and conversation history.
+small enough to review.
+
+Keep the overview brief and easy to scan: highlight the most important problems,
+use bullets for main elements, numbered steps for flows, and tables where they
+clarify comparisons or outcomes. Scale detail to the task; put key services, models,
+methods and affected files in detailed design. Avoid large code dumps and conversation
+history.
 
 Work conversationally: ask one decision question at a time, explain the relevant
 tradeoff and your recommendation, then wait for the answer before moving to the next
