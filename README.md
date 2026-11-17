@@ -138,6 +138,10 @@ Profiles and `--agent` apply only to sessions started with them; they do not
 automatically turn every app conversation into Lead. Project configuration can override profile
 settings.
 
+Codex profiles request an 872k context window and automatic compaction at 400k tokens,
+configured per tier in `codex/roles.toml`. The larger ceiling leaves headroom between
+compactions; it does not guarantee account/model support for that full window.
+
 Use `agentic-setup-feedback` to message the Herdr agent named `agentic-setup`; receiver guidance lives in [AGENTS.md](AGENTS.md).
 
 ## Maintain and verify

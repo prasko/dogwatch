@@ -27,7 +27,9 @@ TARGETS = ("codex", "claude")
 TIERS = ("fast", "standard", "deep", "special")
 EFFORTS = ("low", "medium", "high", "xhigh", "max")
 EFFORT_KEY = {"codex": "model_reasoning_effort", "claude": "effort"}
+CONTEXT_KEYS = {"model_context_window", "model_auto_compact_token_limit"}
 TIER_KEYS = {target: {"model", key} for target, key in EFFORT_KEY.items()}
+TIER_KEYS["codex"] |= CONTEXT_KEYS
 ROLE_KEYS = {"codex": TIER_KEYS["codex"], "claude": TIER_KEYS["claude"] | {"tools"}}
 CLAUDE_AGENT_NOTE = (
     "Agentic-setup role. Use only when another agentic-setup role or the user explicitly "
@@ -36,14 +38,18 @@ CLAUDE_AGENT_NOTE = (
 
 
 def _check_table(where, table, names, allowed):
-    """Require exactly `names` as keys, each a table of nonempty strings from `allowed`."""
+    """Validate table names, allowed keys and string/token-count value types."""
     if set(table) != set(names):
         raise ValueError(f"{where} must define exactly: {', '.join(names)}")
     for name, settings in table.items():
         if not isinstance(settings, dict) or set(settings) - allowed:
             raise ValueError(f"Unsupported settings for {name} in {where}")
-        if not all(isinstance(value, str) and value for value in settings.values()):
-            raise ValueError(f"Settings for {name} in {where} must be nonempty strings")
+        for key, value in settings.items():
+            if key in CONTEXT_KEYS:
+                if type(value) is not int or value <= 0:
+                    raise ValueError(f"{key} for {name} in {where} must be a positive integer")
+            elif not isinstance(value, str) or not value:
+                raise ValueError(f"{key} for {name} in {where} must be a nonempty string")
     return table
 
 
@@ -71,6 +77,11 @@ def _load_runtime(root, target):
     for tier, settings in tiers.items():
         if settings.get(EFFORT_KEY[target], "low") not in EFFORTS:
             raise ValueError(f"Unsupported effort for tier {tier} in {where}")
+    for settings in (*tiers.values(), *resolved.values()):
+        window = settings.get("model_context_window")
+        compact = settings.get("model_auto_compact_token_limit")
+        if window is not None and compact is not None and compact >= window:
+            raise ValueError(f"Compaction threshold must be below the context window in {where}")
     return resolved, tiers
 
 

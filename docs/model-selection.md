@@ -113,6 +113,12 @@ research workers.
   overrides) and override syntax.
 - Validation: unknown tiers, unknown roles and unsupported effort values fail generation.
 
+Codex tiers also set `model_context_window = 872000` and
+`model_auto_compact_token_limit = 400000`, with optional per-role overrides.
+These are emitted into interactive profiles, not custom-agent files. Context-setting
+inheritance to spawned subagents has not been verified. The 872k ceiling comes from
+the local model catalog; acceptance at that size still depends on the service.
+
 Example `claude/roles.toml`:
 
 ```toml
