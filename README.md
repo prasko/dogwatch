@@ -26,6 +26,7 @@ Role boundaries live in `roles/`; reusable procedures live in `skills/`:
 | `agentic-validate` | Exercise acceptance scenarios and record runtime evidence. |
 | `agentic-research` | Answer a bounded factual question with sources and uncertainties. |
 | `agentic-setup-feedback` | Relay setup feedback to an agent in this repository through Herdr. |
+| `agentic-write-doc` | Write concise, structured documents while preserving task-specific content. |
 
 Lead loads skills as needed. Deployment embeds the same procedure bodies into the
 corresponding specialist roles; Developer includes implement, test and validate.
@@ -68,7 +69,7 @@ selects one. For each role above it generates:
 - Claude Code: an agent in `~/.claude/agents/agentic-<role>.md`, usable as a subagent
   and with `claude --agent`. `CLAUDE_CONFIG_DIR` or `--claude-home PATH` changes the
   destination. Descriptions tell Claude to use them only when assigned.
-- Both: seven skills in `<tool-home>/skills/agentic-<skill>/SKILL.md`. The existing
+- Both: eight skills in `<tool-home>/skills/agentic-<skill>/SKILL.md`. The existing
   home overrides also relocate skills, keeping custom and temporary installs isolated.
   For Codex this uses its supported Codex-home skills directory.
 
@@ -152,8 +153,8 @@ composition, target selection, conflicts, backups, repeat deployment, Researcher
 retirement and preservation of unrelated configuration. `--check`
 reports whether the installed files exactly match the current sources.
 
-To remove the setup, delete only the generated files (twenty-one for Codex, fourteen for
-Claude, including seven skills each) after checking their markers, and restore any desired backups. Nothing is
+To remove the setup, delete only the generated files (twenty-two for Codex, fifteen for
+Claude, including eight skills each) after checking their markers, and restore any desired backups. Nothing is
 added to shell startup files, `config.toml` or `settings.json`.
 
 ## Sources

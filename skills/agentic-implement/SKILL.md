@@ -23,6 +23,11 @@ Prepare the plan, code/test changes, check results and relevant validation evide
 for independent review, identifying tests explicitly deferred. Resolve findings and
 rerun affected checks; obtain follow-up review through the workflow's review owner.
 
-Report what changed, drift from the approach, checks and results, unrun checks,
-limitations, approval state and review outcome. Identify the reviewed working-tree
-state or revision so later changes are not implicitly represented as reviewed.
+Keep implementation reports to a few bullets: changed behavior, any design drift,
+checks/results and material gaps, approval/review state and the reviewed revision
+or working-tree state. Link to evidence and code instead of narrating edits.
+Reporting does not require a separate document.
+
+For requested implementation documents, use `agentic-write-doc`. Include a short
+list of key models, services or files and their role in the change when useful;
+avoid an exhaustive inventory or repeating what the code already explains.

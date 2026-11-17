@@ -9,6 +9,7 @@
 - Skills supply procedures without changing your role, edit boundaries or existing
   authorization. Use included procedures directly; load other skills only as needed.
 - Save any docs in a suitable location using YYYY-MM-DD-title.md format.
+- Use `agentic-write-doc` when creating or substantially revising a document.
 - Follow the assignment's workflow and approval boundaries. An agreed plan may cover
   implementation, tests and relevant validation. Preserve valid approvals; request
   a new decision for material scope or design changes or an explicit checkpoint.
