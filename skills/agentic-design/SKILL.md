@@ -10,11 +10,25 @@ that affect the solution: interfaces, data flow, dependencies, failure behavior,
 migration needs and meaningful tradeoffs. Include only those relevant to the task.
 
 For a small change, propose a concise approach with affected components and checks.
-For substantial work, build the dated design document in phases at the established
-location. Start with objective/background, an overview and the big open questions.
-Let the user review that first and settle the main direction before adding details.
-Expand the detailed design incrementally when the user requests more detail,
-keeping each phase small enough to review.
+For substantial work, keep dated working notes separate from the design document
+at the established location:
+
+1. **Decision notes:** during the interview, save each resolved decision and its
+   brief rationale to the notes before asking the next question. Keep open
+   questions in those notes and update decisions when the user revises them. Persist
+   these notes on disk from the first decision; do not wait for an overview draft.
+2. **Design overview:** build the design document with three major sections in order:
+   **Objective**, **Background**, **Overview**. State what will be built and why,
+   synthesizing the agreed direction rather than recounting decisions. Let the user
+   review this before adding details.
+3. **Detailed design:** in the next phase, add **Detailed design** with numbered,
+   descriptive subsections. Expand incrementally as requested, keeping each phase
+   small enough to review.
+
+The design is a standalone statement of what will be built and why, not a conversation
+record. Keep decision logs, open questions and other transient tracking in the notes.
+Propose any additional major section (such as alternatives, future plans, privacy or
+security) before adding it; include relevant detail within the agreed structure.
 
 Use `agentic-write-doc` for concise writing and visible structure.
 Include a short list of key services, models and affected files in detailed design,
@@ -22,8 +36,8 @@ with their responsibilities; avoid an exhaustive inventory or method-by-method w
 
 Work conversationally: ask one decision question at a time, explain the relevant
 tradeoff and your recommendation, then wait for the answer before moving to the next
-dependent decision. Update the document as the conversation progresses. In a background
-assignment, return the current draft and next decision to Lead for user discussion.
+dependent decision. In a background assignment, return the saved decision notes or
+current draft and next decision to Lead for user discussion.
 
 Discuss decisions through the current assignment's user channel. Distinguish
 proposals from approved choices. Obtain the required approach approval before

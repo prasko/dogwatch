@@ -1,6 +1,6 @@
 ---
 name: "agentic-write-doc"
-description: "Write or revise substantive technical documents with clear priorities, separated concerns and concise, visible structure. Use for plans, designs, implementation notes and reports, not routine chat replies."
+description: "Write, revise or review substantive technical documents with clear priorities, separated concerns and concise, visible structure. Use for plans, designs, implementation notes and reports, not routine chat replies."
 ---
 
 # Write a document
@@ -9,10 +9,26 @@ Follow the user's chosen structure, repository conventions and the task skill's
 required content. Do not impose a universal template or page limit. Writing guidance
 does not authorize creating an unrequested document or change your role's boundaries.
 
+## Read before gathering context
+
+When revising or reviewing an existing document, assess standalone readability first.
+An agent already immersed in the task cannot simulate a fresh reader by rereading;
+use a fresh Reviewer without inherited conversation history for that pass. Supply
+the document, its purpose and intended audience, with supporting material for later.
+
+1. Read the document before consulting conversation history or repository material.
+   Can the reader identify what changes before encountering its rationale and steps?
+   Record missing explanations, unexplained terms and steps whose purpose is unclear.
+2. Then consult requirements, recorded decisions, code and evidence to assess
+   correctness and completeness. Context that explains an unclear passage does not
+   fix the document; retain the readability finding until the text stands on its own.
+
 ## Choose what matters
 
 - **Start small:** default to a few bullets highlighting the key problems, decisions
   or outcomes.
+- **State the change first:** plainly say what is changing before explaining why
+  or how. For a rename, give the old-to-new mapping before migration steps.
 - **Expand on request:** for larger documents, start with a compact outline and
   overview. Let the user request details; honor depth already explicitly requested
   and the task's discussion and approval flow.
