@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# Managed by agentic-setup: Herdr agent launcher.
+# Managed by dogwatch: Herdr agent launcher.
 """Launch Codex or Claude with access to the current Herdr TUI socket."""
 
 import json
@@ -9,7 +9,8 @@ import sys
 import tomllib
 
 
-MARKER = "# Managed by agentic-setup: Herdr agent launcher."
+MARKER = "# Managed by dogwatch: Herdr agent launcher."
+LEGACY_MARKER = "# Managed by agentic-setup: Herdr agent launcher."
 AGENTS = ("codex", "claude")
 CODEX_ADMIN_COMMANDS = {
     "agents", "login", "logout", "mcp", "plugin", "app-server",
@@ -42,10 +43,14 @@ def find_binary(agent, environ, wrapper_dir=None):
         if candidate.resolve() == wrapper.resolve():
             continue
         with candidate.open("rb") as stream:
-            if MARKER.encode() in stream.read(256):
+            if is_managed(stream.read(256)):
                 continue
         return str(candidate)
     raise ValueError(f"No installed {agent} executable found on PATH beyond the Herdr launchers.")
+
+
+def is_managed(content):
+    return any(marker.encode() in content[:256] for marker in (MARKER, LEGACY_MARKER))
 
 
 def codex_arguments(args):
@@ -143,13 +148,13 @@ def launch_argv(agent, args, environ):
     if command not in {"exec", "e", "review"} and "--no-daemon" not in keys:
         extra.append("--no-daemon")
     overrides = [
-        'default_permissions="herdr"',
-        'permissions.herdr.extends=":workspace"',
-        'permissions.herdr.network.enabled=true',
+        'default_permissions="dogwatch"',
+        'permissions.dogwatch.extends=":workspace"',
+        'permissions.dogwatch.network.enabled=true',
         'features.network_proxy=true',
     ]
     socket_table = "{" + ", ".join(json.dumps(path) + '="allow"' for path in sockets) + "}"
-    overrides.append("permissions.herdr.network.unix_sockets=" + socket_table)
+    overrides.append("permissions.dogwatch.network.unix_sockets=" + socket_table)
     for value in overrides:
         extra.extend(["-c", value])
     return [real, *extra, *args]
@@ -162,7 +167,7 @@ def main():
         argv = launch_argv(sys.argv[1], sys.argv[2:], os.environ)
         os.execv(argv[0], argv)
     except (ValueError, OSError) as error:
-        sys.exit("Herdr agent launcher: " + str(error))
+        sys.exit("Dogwatch launcher: " + str(error))
 
 
 if __name__ == "__main__":

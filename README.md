@@ -1,4 +1,4 @@
-# Agentic setup
+# Dogwatch
 
 A coordinated coding workflow for Codex and Claude Code in **Herdr TUI**. Give Lead
 a task; it works directly or brings in specialists for scope, design, development,
@@ -63,13 +63,13 @@ python3 scripts/install_launchers.py --dry-run
 python3 scripts/install_launchers.py
 ```
 
-This copies launchers to `~/.config/herdr/agent-launchers/` and adds a marked block
+This copies launchers to `~/.config/dogwatch/launchers/` and adds a marked block
 to `~/.zshrc`. In a fresh Herdr pane, plain `codex` and `claude` use these launchers;
 outside Herdr, your normal commands keep working. Real binaries are found on PATH,
 so Homebrew, native and npm installations need no hardcoded paths. Shell aliases
 or functions named `codex` or `claude` take precedence; remove those conflicts.
 
-Each launch allows the current `HERDR_SOCKET_PATH`. Codex uses a permission
+Each launch allows the current `HERDR_SOCKET_PATH`. Codex uses the `dogwatch` permission
 profile extending `:workspace` and runs interactive sessions with `--no-daemon`;
 Claude gets a shell-sandbox settings override. **Socket access lets agents control
 other Herdr panes and run commands beyond their own sandbox.** Claude's sandbox
@@ -80,9 +80,13 @@ is refused because it would replace the socket override.
 The installer leaves agent configuration and approval preferences intact. It honors
 `XDG_CONFIG_HOME`, `XDG_STATE_HOME` and `ZDOTDIR`; `--launcher-home`, `--state-home`
 and `--shell-rc` override those destinations. Changed files have private backups and
-a manifest under `~/.local/state/herdr-agent-setup/`. Unmanaged launcher files stop
+a manifest under `~/.local/state/dogwatch/`. Unmanaged launcher files stop
 installation: inspect them before using `--replace`. This also applies when migrating
-an earlier hand-installed launcher.
+an earlier hand-installed launcher: use its original `--launcher-home` with
+`--replace` to adopt it in place. The installer migrates marked launchers from
+the old `~/.config/herdr/agent-launchers/` directory as each provider is selected.
+For a custom launcher directory, pass the original `--launcher-home` to update it
+in place. Old backups stay at their original locations.
 
 ### 3. Deploy the roles
 
@@ -92,9 +96,10 @@ python3 scripts/deploy.py
 python3 scripts/deploy.py --check
 ```
 
-Deployment creates Codex agents in `~/.codex/agents/` and interactive profiles in
-`~/.codex/agentic-<role>.config.toml`; Claude agents go in `~/.claude/agents/`.
-Both receive eight workflow skills in their tool home's `skills/` directory.
+Deployment creates Codex agents in `~/.codex/agents/dogwatch-<role>.toml` and
+interactive profiles in `~/.codex/dogwatch-<role>.config.toml`; Claude agents go in
+`~/.claude/agents/dogwatch-<role>.md`. Both receive eight `dogwatch-` workflow skills
+in their tool home's `skills/` directory.
 `CODEX_HOME` / `--codex-home PATH` and `CLAUDE_CONFIG_DIR` / `--claude-home PATH`
 change these homes. Export custom homes in your shell so new Herdr panes use them too.
 
@@ -102,16 +107,18 @@ Existing files without this repository's generated marker stop deployment; inspe
 the dry run before using `--replace`. Changed files receive adjacent timestamped
 backups. Unrelated configuration and project agents are preserved; generated paths
 refuse symlinks. Make role/skill edits here and redeploy, since updates replace
-local edits. Deployment also retires old generated Researcher files with backups.
+local edits. Deployment migrates marked `agentic-` files and Codex's old unprefixed
+roles to the Dogwatch names, with backups. Retired Researcher files are also removed.
+Unmarked files at old paths are preserved.
 
 ## Use
 
 Start `herdr`, open your project, and start Lead in a fresh pane:
 
 ```sh
-codex --profile agentic-lead -C /path/to/project
+codex --profile dogwatch-lead -C /path/to/project
 # Or Claude, with a 1M compaction window for Lead:
-cd /path/to/project && CLAUDE_CODE_AUTO_COMPACT_WINDOW=1000000 claude --agent agentic-lead
+cd /path/to/project && CLAUDE_CODE_AUTO_COMPACT_WINDOW=1000000 claude --agent dogwatch-lead
 ```
 
 Give Lead a task, for example: “Investigate why this test fails, propose a fix,
@@ -136,8 +143,8 @@ specialists; they do not turn every conversation into Lead.
 | Validator | Exercise acceptance scenarios on a throwaway instance. |
 | Reviewer | Independently assess the assigned artifact. |
 
-Codex background roles use names such as `reviewer`; interactive profiles and
-Claude agents use `agentic-reviewer`. See [Lead](roles/lead.md) for the full workflow.
+Codex background roles, interactive profiles and Claude agents all use names such
+as `dogwatch-reviewer`. See [Lead](roles/lead.md) for the full workflow.
 
 ## Preferences and compatibility
 
@@ -179,8 +186,26 @@ and PATH block remain until the last provider is removed. Open a fresh pane afte
 Backups are retained; their `manifest.json` records original paths and modes for
 manual restoration. Empty directories and unrelated files are left alone.
 
-Remove only marked generated role/profile/skill files: 22 for Codex, 15 for Claude.
-Restore any desired adjacent backups. To remove the external pieces too, use
+To remove roles and workflow skills, preview
+`python3 scripts/deploy.py --uninstall --dry-run`, then repeat without `--dry-run`.
+Both scripts accept `--target codex`, `--target claude` or `--target all` (the default).
+
+`deploy.py` also accepts `--component roles`, `--component skills` or
+`--component all` (the default) with `--uninstall`. For example,
+preview removing Codex roles while keeping its skills:
+
+```sh
+python3 scripts/deploy.py --uninstall --target codex --component roles --dry-run
+```
+
+Roles include their interactive profiles. Skills can be used independently;
+removing skills while keeping roles produces a dependency warning. Removal backs
+up and deletes only marked files, including the old names, and keeps personal
+agents, configuration and backups. Restore any desired backups manually. Installation
+and updates keep roles and skills together so their names and references stay in sync.
+If both providers share a home directory, changing shared skills requires `--target all`.
+
+To remove the external pieces too, use
 `herdr integration uninstall codex` / `claude`,
 `npx skills remove herdr -g -a codex claude-code`, and
 `herdr plugin uninstall persiyanov.reviewr`. Remove the Reviewr binding and any
@@ -195,7 +220,7 @@ roles. `roles/common.md` applies to every role; each tool's `notes.md` and
 `roles.toml` add tool-specific behavior and model tiers. There are no automatic
 workflow review gates; agents commission reviews according to their roles.
 See [model selection](docs/model-selection.md) and the [roadmap](docs/roadmap.md).
-`agentic-setup-feedback` can send feedback to a Herdr agent named `agentic-setup`;
+`dogwatch-setup-feedback` can send feedback to a Herdr agent named `agentic-setup`;
 receiver instructions live in [AGENTS.md](AGENTS.md).
 
 ```sh
@@ -205,6 +230,7 @@ python3 scripts/deploy.py --check
 ```
 
 Tests use temporary homes and stub CLIs to cover role generation, launcher execution,
-provider selection, configuration preservation, backups, repeat installation and
-removal. `deploy.py --check` compares installed roles and skills with repository
-sources. A full signed-in workflow on a clean Mac account still needs validation.
+provider/component selection, name migration, configuration preservation, backups,
+repeat installation and removal. `deploy.py --check` compares installed roles and
+skills with repository sources. A full signed-in workflow on a clean Mac account
+still needs validation.

@@ -25,9 +25,9 @@ class LauncherTests(unittest.TestCase):
         self.home = Path(self.temp.name).resolve()
         self.bin = self.home / "real bin"
         self.bin.mkdir()
-        self.package = self.home / "config space ' quote" / "herdr/agent-launchers"
+        self.package = self.home / "config space ' quote" / "dogwatch/launchers"
         self.shell_rc = self.home / "shell/.zshrc"
-        self.state = self.home / "state/herdr-agent-setup"
+        self.state = self.home / "state/dogwatch"
         self.env = {
             "HOME": str(self.home),
             "PATH": os.pathsep.join([str(self.bin), str(Path(sys.executable).parent), "/usr/bin", "/bin"]),
@@ -250,7 +250,7 @@ class LauncherTests(unittest.TestCase):
 
     def test_codex_socket_profile_and_prompt_arguments(self):
         self.install("--target", "codex")
-        args = ["--profile", "agentic-lead", "-C", str(self.home / "project space"),
+        args = ["--profile", "dogwatch-lead", "-C", str(self.home / "project space"),
                 "-c", 'approvals_reviewer="auto_review"', "--", "--sandbox is just prompt text"]
         result = self.run_wrapper("codex", *args)
         self.assertEqual(result.returncode, 0, result.stderr)
@@ -258,9 +258,9 @@ class LauncherTests(unittest.TestCase):
         self.assertEqual(argv[-len(args):], args)
         self.assertIn("--no-daemon", argv)
         config = self.overrides(argv)
-        self.assertEqual(config["default_permissions"], "herdr")
-        self.assertEqual(config["permissions"]["herdr"]["extends"], ":workspace")
-        self.assertEqual(config["permissions"]["herdr"]["network"]["unix_sockets"],
+        self.assertEqual(config["default_permissions"], "dogwatch")
+        self.assertEqual(config["permissions"]["dogwatch"]["extends"], ":workspace")
+        self.assertEqual(config["permissions"]["dogwatch"]["network"]["unix_sockets"],
                          {self.env["HERDR_SOCKET_PATH"]: "allow"})
         self.assertEqual(config["approvals_reviewer"], "auto_review")
         self.assertNotIn("approval_policy", config)
@@ -269,12 +269,12 @@ class LauncherTests(unittest.TestCase):
         for command in ("exec", "e", "review"):
             argv = launcher.launch_argv("codex", [command], self.env)
             self.assertNotIn("--no-daemon", argv)
-            self.assertIn('default_permissions="herdr"', argv)
+            self.assertIn('default_permissions="dogwatch"', argv)
         for args in (["login"], ["-m", "help", "exec", "--help"], ["--remote=unix:///server"]):
             self.assertEqual(launcher.launch_argv("codex", args, self.env | {"HERDR_SOCKET_PATH": ""}),
                              [str(self.bin / "codex"), *args])
         argv = launcher.launch_argv("codex", ["-m", "help", "exec"], self.env)
-        self.assertIn('default_permissions="herdr"', argv)
+        self.assertIn('default_permissions="dogwatch"', argv)
 
     def test_outside_herdr_and_help_pass_through_without_socket(self):
         for agent in launcher.AGENTS:
@@ -305,13 +305,13 @@ class LauncherTests(unittest.TestCase):
         linked = self.home / "linked"
         linked.symlink_to(self.home, target_is_directory=True)
         socket = str(linked / "socket.sock")
-        argv = launcher.launch_argv("claude", ["--agent", "agentic-lead", "--permission-mode", "auto"],
+        argv = launcher.launch_argv("claude", ["--agent", "dogwatch-lead", "--permission-mode", "auto"],
                                     self.env | {"HERDR_SOCKET_PATH": socket})
         self.assertEqual(argv[1], "--settings")
         settings = json.loads(argv[2])
         self.assertEqual(settings, {"sandbox": {"enabled": True, "failIfUnavailable": True,
                          "network": {"allowUnixSockets": [socket, str(self.home / "socket.sock")]}}})
-        self.assertEqual(argv[3:], ["--agent", "agentic-lead", "--permission-mode", "auto"])
+        self.assertEqual(argv[3:], ["--agent", "dogwatch-lead", "--permission-mode", "auto"])
 
     def test_claude_explicit_settings_cannot_silently_drop_socket_override(self):
         for args in (["--settings", '{"permissions":{"defaultMode":"auto"}}'],
@@ -328,10 +328,157 @@ class LauncherTests(unittest.TestCase):
         (home / "config.toml").write_text('sandbox_mode="workspace-write"\n')
         args = ["exec", "--ignore-user-config"]
         argv = launcher.launch_argv("codex", args, self.env)
-        self.assertIn('default_permissions="herdr"', argv)
+        self.assertIn('default_permissions="dogwatch"', argv)
         (home / "custom.config.toml").write_text('sandbox_mode="workspace-write"\n')
         with self.assertRaisesRegex(ValueError, "Legacy sandbox settings"):
             launcher.launch_argv("codex", [*args, "--profile", "custom"], self.env)
+
+    def legacy_install(self):
+        package = Path(self.env["XDG_CONFIG_HOME"]) / "herdr/agent-launchers"
+        for relative in ("bin/codex", "bin/claude", "launcher.py"):
+            path = package / relative
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_text((ROOT / "launchers" / relative).read_text().replace(
+                launcher.MARKER, launcher.LEGACY_MARKER))
+            path.chmod(0o755 if relative.startswith("bin/") else 0o644)
+        self.shell_rc.parent.mkdir(parents=True, exist_ok=True)
+        self.shell_rc.write_text("# personal shell\n" + installer.shell_block(package, legacy=True))
+        return package
+
+    def test_migration_one_provider_at_a_time_preserves_other_launcher_and_shell(self):
+        legacy = self.legacy_install()
+        old = {path: path.read_bytes() for path in legacy.rglob("*") if path.is_file()}
+        shell = self.shell_rc.read_bytes()
+        result = self.cli("--target", "codex", "--dry-run")
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(shell, self.shell_rc.read_bytes())
+        self.assertEqual(old, {path: path.read_bytes() for path in old})
+        self.assertFalse(self.package.exists())
+        self.assertFalse(self.state.exists())
+
+        self.install("--target", "codex")
+        self.assertFalse((legacy / "bin/codex").exists())
+        self.assertEqual((legacy / "bin/claude").read_bytes(), old[legacy / "bin/claude"])
+        self.assertEqual((legacy / "launcher.py").read_bytes(), old[legacy / "launcher.py"])
+        self.assertIn(installer.LEGACY_BEGIN, self.shell_rc.read_text())
+        self.assertIn(installer.BEGIN, self.shell_rc.read_text())
+        if shutil.which("zsh"):
+            result = subprocess.run([shutil.which("zsh"), "-f", "-c",
+                                     'source "$1"; command -v codex; command -v claude',
+                                     "zsh", str(self.shell_rc)], env=self.env,
+                                    capture_output=True, text=True)
+            self.assertEqual(result.returncode, 0, result.stderr)
+            self.assertEqual(result.stdout.splitlines(),
+                             [str(self.package / "bin/codex"), str(legacy / "bin/claude")])
+
+        self.install("--target", "claude")
+        self.assertFalse(any(path.exists() for path in old))
+        self.assertNotIn(installer.LEGACY_BEGIN, self.shell_rc.read_text())
+        self.assertEqual(self.shell_rc.read_text().count(installer.BEGIN), 1)
+        saved = {}
+        for manifest in self.state.glob("*/manifest.json"):
+            for path, entry in json.loads(manifest.read_text()).items():
+                if entry["backup"]:
+                    saved[Path(path)] = Path(entry["backup"]).read_bytes()
+        for path, content in old.items():
+            self.assertEqual(saved[path], content)
+
+    def test_uninstall_legacy_and_current_providers_independently(self):
+        legacy = self.legacy_install()
+        self.install("--target", "codex")
+        self.install("--uninstall", "--target", "claude")
+        self.assertFalse((legacy / "launcher.py").exists())
+        self.assertFalse((legacy / "bin/claude").exists())
+        self.assertTrue((self.package / "bin/codex").exists())
+        self.assertIn(installer.BEGIN, self.shell_rc.read_text())
+        self.assertNotIn(installer.LEGACY_BEGIN, self.shell_rc.read_text())
+        self.install("--uninstall", "--target", "codex")
+        self.assertFalse((self.package / "launcher.py").exists())
+        self.assertNotIn(installer.BEGIN, self.shell_rc.read_text())
+        self.assertIn("# personal shell", self.shell_rc.read_text())
+
+    def test_uninstall_legacy_only_does_not_install_new_files(self):
+        legacy = self.legacy_install()
+        self.install("--uninstall", "--target", "codex")
+        self.assertFalse((legacy / "bin/codex").exists())
+        self.assertTrue((legacy / "bin/claude").exists())
+        self.assertIn(installer.LEGACY_BEGIN, self.shell_rc.read_text())
+        self.assertFalse(self.package.exists())
+        self.install("--uninstall")
+        self.assertFalse((legacy / "launcher.py").exists())
+        self.assertNotIn(installer.LEGACY_BEGIN, self.shell_rc.read_text())
+
+    def test_custom_directory_updates_in_place_and_skips_legacy_wrappers_on_path(self):
+        legacy = self.legacy_install()
+        env = self.env | {"PATH": str(legacy / "bin") + os.pathsep + self.env["PATH"]}
+        self.assertEqual(launcher.find_binary("codex", env), str(self.bin / "codex"))
+        self.install("--launcher-home", str(legacy))
+        self.assertFalse(self.package.exists())
+        self.assertIn(launcher.MARKER, (legacy / "bin/codex").read_text())
+        self.assertIn(installer.BEGIN, self.shell_rc.read_text())
+        self.assertNotIn(installer.LEGACY_BEGIN, self.shell_rc.read_text())
+        self.install("--launcher-home", str(legacy), "--uninstall")
+        self.assertNotIn(installer.BEGIN, self.shell_rc.read_text())
+
+    def test_unmanaged_legacy_cannot_be_mistaken_for_real_binary_or_deleted(self):
+        legacy = self.legacy_install()
+        personal = legacy / "bin/codex"
+        personal.write_text("#!/bin/sh\n# personal wrapper\n")
+        result = self.cli("--target", "codex")
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("Unmanaged legacy launcher", result.stderr)
+        self.assertFalse(self.package.exists())
+        self.install("--uninstall")
+        self.assertTrue(personal.exists())
+        self.assertTrue((legacy / "launcher.py").exists())
+        self.assertIn(installer.LEGACY_BEGIN, self.shell_rc.read_text())
+
+    def test_uninstall_never_forces_unmanaged_file_removal(self):
+        self.install()
+        personal = self.package / "bin/codex"
+        personal.write_text("my wrapper")
+        for args in (("--uninstall",), ("--uninstall", "--replace")):
+            result = self.cli(*args)
+            self.assertNotEqual(result.returncode, 0)
+            self.assertEqual(personal.read_text(), "my wrapper")
+            self.assertTrue((self.package / "bin/claude").exists())
+
+    def test_migration_rejects_symlinks_and_custom_legacy_block_before_writing(self):
+        legacy = self.legacy_install()
+        target = legacy / "bin/codex"
+        original = target.read_bytes()
+        target.unlink()
+        target.symlink_to(self.bin / "codex")
+        result = self.cli()
+        self.assertNotEqual(result.returncode, 0)
+        self.assertFalse(self.package.exists())
+        target.unlink()
+        target.write_bytes(original)
+        self.shell_rc.write_text(self.shell_rc.read_text().replace("herdr/agent-launchers", "custom/location"))
+        result = self.cli()
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("Legacy launcher PATH block", result.stderr)
+        self.assertFalse(self.package.exists())
+        self.assertTrue(target.exists())
+
+    def test_wrong_directory_cannot_replace_or_remove_custom_dogwatch_shell_block(self):
+        custom = self.home / "custom launchers"
+        self.install("--launcher-home", str(custom))
+        shell = self.shell_rc.read_bytes()
+        original = {path: path.read_bytes() for path in custom.rglob("*") if path.is_file()}
+        backups = set(self.state.iterdir())
+        for args in ((), ("--uninstall",), ("--dry-run",)):
+            result = self.cli(*args)
+            self.assertNotEqual(result.returncode, 0)
+            self.assertIn("Dogwatch launcher PATH block", result.stderr)
+            self.assertEqual(self.shell_rc.read_bytes(), shell)
+            self.assertEqual(original, {path: path.read_bytes() for path in original})
+            self.assertFalse(self.package.exists())
+            self.assertEqual(backups, set(self.state.iterdir()))
+        self.install("--launcher-home", str(custom), "--uninstall", "--target", "codex")
+        self.assertFalse((custom / "bin/codex").exists())
+        self.assertTrue((custom / "bin/claude").exists())
+        self.assertEqual(self.shell_rc.read_bytes(), shell)
 
 
 if __name__ == "__main__":

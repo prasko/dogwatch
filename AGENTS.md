@@ -1,6 +1,6 @@
 # Receiving setup feedback
 
-Any agent here can receive `agentic-setup-feedback`; the default Herdr name is
+Any agent here can receive `dogwatch-setup-feedback`; the default Herdr name is
 `agentic-setup`. Read `README.md` for repository structure, deployment and checks.
 
 - Check relevant instructions and the current diff first. Distinguish missing or

@@ -1,11 +1,11 @@
 ---
-name: "agentic-setup-feedback"
-description: "Send user feedback or concrete observations about agentic-setup roles, skills and workflow to its repository's maintainer through Herdr. Use when asked to relay setup feedback or request a setup improvement based on current work."
+name: "dogwatch-setup-feedback"
+description: "Send user feedback or concrete observations about Dogwatch roles, skills and workflow to its repository's maintainer through Herdr. Use when asked to relay setup feedback or request a setup improvement based on current work."
 ---
 
 # Setup feedback
 
-Send actionable feedback to an existing agent in the agentic-setup repository.
+Send actionable feedback to an existing agent in the Dogwatch repository.
 The receiver owns checking coverage and making authorized source changes.
 
 ## Recipient
@@ -16,7 +16,7 @@ caller and explain that it has not been sent.
 
 Use an explicitly supplied live agent name or pane ID; otherwise target the agent
 named `agentic-setup`. Inspect it with `herdr agent get <target>` and confirm its
-working directory is the intended agentic-setup checkout. A matching name alone
+working directory is the intended Dogwatch checkout. A matching name alone
 does not establish the repository. If the target is missing or ambiguous, report
 that and ask for a recipient; do not start an agent or broadcast to other agents.
 Selecting among all agents in the repository is optional follow-up work, not

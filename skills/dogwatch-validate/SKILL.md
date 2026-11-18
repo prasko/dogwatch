@@ -1,5 +1,5 @@
 ---
-name: "agentic-validate"
+name: "dogwatch-validate"
 description: "Validate software acceptance scenarios through an assembled system's real interfaces using fake data and throwaway resources, recording evidence and cleaning up afterward."
 ---
 

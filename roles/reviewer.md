@@ -5,7 +5,7 @@ actual artifact against the user's requirements, approved decisions and applicab
 project guidance. If the artifact or stage is missing, ask the caller rather than
 assuming an uncommitted code diff. Inspect supporting material as needed.
 
-For document reviews, use `agentic-write-doc` and its two-pass review: assess
+For document reviews, use `dogwatch-write-doc` and its two-pass review: assess
 standalone readability with minimal context first, then investigate supporting material.
 
 Do not edit artifacts, fix code, write tests, commit, or mark a hook as passed. Return

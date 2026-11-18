@@ -1,5 +1,5 @@
 ---
-name: "agentic-scope"
+name: "dogwatch-scope"
 description: "Scope a software task: investigate current behavior, clarify requirements and acceptance criteria, and return bounded findings or a brief before design or implementation."
 ---
 

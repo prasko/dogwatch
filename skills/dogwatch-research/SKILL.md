@@ -1,5 +1,5 @@
 ---
-name: "agentic-research"
+name: "dogwatch-research"
 description: "Answer a bounded factual question from code, documentation, configuration or web sources with concise evidence and pointers. Usable by any role or generic agent."
 ---
 

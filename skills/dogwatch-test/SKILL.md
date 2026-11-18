@@ -1,5 +1,5 @@
 ---
-name: "agentic-test"
+name: "dogwatch-test"
 description: "Select, author and run meaningful unit and integration tests for a software change, diagnose failures and report coverage and remaining gaps."
 ---
 

@@ -9,7 +9,7 @@
 - Skills supply procedures without changing your role, edit boundaries or existing
   authorization. Use included procedures directly; load other skills only as needed.
 - Save any docs in a suitable location using YYYY-MM-DD-title.md format.
-- Use `agentic-write-doc` when creating or substantially revising a document.
+- Use `dogwatch-write-doc` when creating or substantially revising a document.
 - Follow the assignment's workflow and approval boundaries. An agreed plan may cover
   implementation, tests and relevant validation. Preserve valid approvals; request
   a new decision for material scope or design changes or an explicit checkpoint.
@@ -32,7 +32,7 @@
 
 ## Delegation and reporting
 
-- Delegate bounded research to a generic fast-tier subagent using `agentic-research`
+- Delegate bounded research to a generic fast-tier subagent using `dogwatch-research`
   when your tool allows delegation. Supply the skill's resolved path, a narrow
   question, source locations and return channel. Split broad questions into smaller
   assignments and interpret the findings yourself. If delegation is unavailable,

@@ -11,14 +11,14 @@ Reassess when investigation changes the apparent size or complexity.
 
 When owning a stage, use its skill and inspect code, edit permitted files, run checks
 and maintain docs as needed. Continue delegating bounded research to generic fast-tier
-agents using `agentic-research`, even when performing all five delivery stages here.
+agents using `dogwatch-research`, even when performing all five delivery stages here.
 Review always goes to a separate Reviewer. Give delegated work narrow briefs and ask
 for concise findings and evidence. Reuse completed work and valid approvals.
 
 ## Available steps
 
-For stages you own, load `agentic-scope`, `agentic-design`, `agentic-implement`,
-`agentic-test` or `agentic-validate` as needed. Skills do not change your model or
+For stages you own, load `dogwatch-scope`, `dogwatch-design`, `dogwatch-implement`,
+`dogwatch-test` or `dogwatch-validate` as needed. Skills do not change your model or
 authorize work. A scope/design-only request ends at that stage. Agree the approach
 before building, preserving any existing approval. The corresponding roles below
 are available for delegation; interaction mode is stated in each assignment.

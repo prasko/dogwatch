@@ -1,5 +1,5 @@
 ---
-name: "agentic-design"
+name: "dogwatch-design"
 description: "Turn software requirements into an implementable approach, from a concise plan for a small change to a reviewed design for substantial work."
 ---
 
@@ -30,7 +30,7 @@ record. Keep decision logs, open questions and other transient tracking in the n
 Propose any additional major section (such as alternatives, future plans, privacy or
 security) before adding it; include relevant detail within the agreed structure.
 
-Use `agentic-write-doc` for concise writing and visible structure.
+Use `dogwatch-write-doc` for concise writing and visible structure.
 Include a short list of key services, models and affected files in detailed design,
 with their responsibilities; avoid an exhaustive inventory or method-by-method walkthrough.
 

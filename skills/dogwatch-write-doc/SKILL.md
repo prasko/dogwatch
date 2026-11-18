@@ -1,5 +1,5 @@
 ---
-name: "agentic-write-doc"
+name: "dogwatch-write-doc"
 description: "Write, revise or review substantive technical documents with clear priorities, separated concerns and concise, visible structure. Use for plans, designs, implementation notes and reports, not routine chat replies."
 ---
 

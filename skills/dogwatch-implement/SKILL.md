@@ -1,5 +1,5 @@
 ---
-name: "agentic-implement"
+name: "dogwatch-implement"
 description: "Implement an agreed software change, coordinate its tests and validation, handle design drift and prepare the resulting changes for independent review."
 ---
 
@@ -9,10 +9,10 @@ Build from the agreed plan or approved design within the caller's role and assig
 edit boundaries. Skill use does not grant approval to build. Preserve authorization
 already covering implementation, tests and validation.
 
-Include relevant tests as the change develops, using `agentic-test` when needed.
+Include relevant tests as the change develops, using `dogwatch-test` when needed.
 Defer test authoring only when assigned separately or blocked by an explicit
 code-before-tests checkpoint. Read the project's README and run applicable existing
-checks. Use `agentic-validate` for runtime acceptance scenarios included in the work.
+checks. Use `dogwatch-validate` for runtime acceptance scenarios included in the work.
 Do not force testing and validation into separate passes when evidence overlaps.
 
 Raise material changes to scope or design through the current user-question channel
@@ -28,6 +28,6 @@ checks/results and material gaps, approval/review state and the reviewed revisio
 or working-tree state. Link to evidence and code instead of narrating edits.
 Reporting does not require a separate document.
 
-For requested implementation documents, use `agentic-write-doc`. Include a short
+For requested implementation documents, use `dogwatch-write-doc`. Include a short
 list of key models, services or files and their role in the change when useful;
 avoid an exhaustive inventory or repeating what the code already explains.
