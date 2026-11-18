@@ -1,0 +1,3 @@
+#!/bin/sh
+# Managed by agentic-setup: Herdr agent launcher.
+exec python3 "$(dirname -- "$0")/../launcher.py" codex "$@"
