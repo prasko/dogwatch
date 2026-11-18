@@ -18,3 +18,6 @@
 - These instructions are the user's explicit, standing request to delegate: start
   role subagents and generic research workers as these instructions direct, without asking first. This
   overrides any default guidance to avoid subagents unless the user asks.
+
+- For background commands outside the sandbox, use absolute session-scratchpad paths
+  for results and logs, not `$TMPDIR`. Check exit status and stderr before using results.

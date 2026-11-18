@@ -29,6 +29,9 @@
   ready for review, with the review material your role lists. Lead commissions the
   review and routes findings back to you or to a follow-up worker.
 - Report unresolved disagreement with review findings instead of silently discarding it.
+- For a requested cross-provider review, use the normal Herdr launcher defaults;
+  do not add sandbox or approval overrides. Request review-only behavior in a
+  self-contained prompt and return findings under the existing review rules.
 
 ## Delegation and reporting
 
