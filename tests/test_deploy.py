@@ -2,13 +2,16 @@ from contextlib import redirect_stdout
 import importlib.util
 import io
 import json
+import os
 from pathlib import Path
 import shutil
+import stat
 import subprocess
 import sys
 import tempfile
 import tomllib
 import unittest
+from unittest import mock
 
 SPEC = importlib.util.spec_from_file_location(
     "deploy", Path(__file__).resolve().parents[1] / "scripts/deploy.py")
@@ -22,6 +25,10 @@ class DeploymentTests(unittest.TestCase):
         self.addCleanup(self.temp.cleanup)
         # macOS /var is a symlink; use its real path for the test destination.
         self.home = Path(self.temp.name).resolve()
+        self.state_home = self.home / "state/dogwatch"
+        environment = mock.patch.dict(os.environ, {"XDG_STATE_HOME": str(self.home / "state")})
+        environment.start()
+        self.addCleanup(environment.stop)
         self.destination = self.home / "codex"
         self.homes = {"codex": self.destination, "claude": self.home / "claude"}
         self.rendered = deploy.render()
@@ -29,6 +36,11 @@ class DeploymentTests(unittest.TestCase):
         quiet = redirect_stdout(io.StringIO())
         quiet.__enter__()
         self.addCleanup(quiet.__exit__, None, None, None)
+
+    def backups(self, path):
+        return [Path(entry["backup"])
+                for manifest in sorted(self.state_home.glob("*/manifest.json"))
+                if (entry := json.loads(manifest.read_text()).get(str(path)))]
 
     def test_profiles_and_agents_have_same_instructions_without_permission_overrides(self):
         roles = deploy.ROLES
@@ -169,7 +181,7 @@ class DeploymentTests(unittest.TestCase):
         path = self.homes["claude"] / "agents/dogwatch-lead.md"
         path.write_text(path.read_text() + "local edit\n")
         deploy.deploy(outputs)
-        self.assertEqual(len(list(path.parent.glob("dogwatch-lead.md.bak-*"))), 1)
+        self.assertEqual(len(self.backups(path)), 1)
         self.assertEqual(deploy.deploy(outputs, check=True), 0)
 
     def test_dry_run_does_not_create_destination(self):
@@ -203,7 +215,7 @@ class DeploymentTests(unittest.TestCase):
         self.assertFalse((self.destination / "agents/dogwatch-lead.toml").exists())
         self.assertEqual(conflict.read_bytes(), original)
         deploy.deploy(self.outputs, replace=True)
-        backups = list(conflict.parent.glob("dogwatch-reviewer.toml.bak-*"))
+        backups = self.backups(conflict)
         self.assertEqual(len(backups), 1)
         self.assertEqual(backups[0].read_bytes(), original)
 
@@ -214,7 +226,7 @@ class DeploymentTests(unittest.TestCase):
         path.write_text(changed)
         self.assertEqual(deploy.deploy(self.outputs, check=True), 1)
         deploy.deploy(self.outputs)
-        backups = list(self.destination.glob("dogwatch-lead.config.toml.bak-*"))
+        backups = self.backups(path)
         self.assertEqual(backups[0].read_text(), changed)
 
     def test_symlink_is_refused_without_touching_target(self):
@@ -257,7 +269,7 @@ class DeploymentTests(unittest.TestCase):
             deploy.deploy(self.outputs)
         self.assertFalse((self.destination / "agents").exists())
         deploy.deploy(self.outputs, replace=True)
-        self.assertEqual(next(path.parent.glob("SKILL.md.bak-*")).read_bytes(), original)
+        self.assertEqual(self.backups(path)[0].read_bytes(), original)
         self.assertEqual(deploy.deploy(self.outputs, check=True), 0)
 
     def test_retirement_is_scoped_backed_up_and_idempotent(self):
@@ -271,11 +283,11 @@ class DeploymentTests(unittest.TestCase):
         self.assertEqual(deploy.deploy(self.outputs, retired=retired, check=True), 1)
         deploy.deploy(self.outputs, retired=retired)
         self.assertTrue(all(not path.exists() for path in retired))
-        self.assertEqual(next(retired[0].parent.glob("researcher.toml.bak-*")).read_bytes(), original)
+        self.assertEqual(self.backups(retired[0])[0].read_bytes(), original)
         self.assertEqual(deploy.deploy(self.outputs, retired=retired, check=True), 0)
-        backups = set(self.home.rglob("*.bak-*"))
+        backups = set(self.state_home.rglob("*"))
         deploy.deploy(self.outputs, retired=retired)
-        self.assertEqual(set(self.home.rglob("*.bak-*")), backups)
+        self.assertEqual(set(self.state_home.rglob("*")), backups)
         self.assertTrue(all(path.is_relative_to(self.homes["claude"])
                             for path in deploy.retired_paths(self.homes, ("claude",))))
 
@@ -342,7 +354,7 @@ class DeploymentTests(unittest.TestCase):
                 self.assertEqual(old.read_bytes(), content)
             else:
                 self.assertFalse(old.exists())
-                self.assertEqual(next(old.parent.glob(old.name + ".bak-*")).read_bytes(), content)
+                self.assertEqual(self.backups(old)[0].read_bytes(), content)
         self.assertEqual(self.cli("--target", "codex", "--check").returncode, 0)
 
     def test_uninstall_roles_keeps_skills_other_provider_and_configuration(self):
@@ -365,12 +377,12 @@ class DeploymentTests(unittest.TestCase):
         for path, (content, modified) in before.items():
             if path in removed:
                 self.assertFalse(path.exists())
-                self.assertEqual(next(path.parent.glob(path.name + ".bak-*")).read_bytes(), content)
+                self.assertEqual(self.backups(path)[0].read_bytes(), content)
             else:
                 self.assertEqual((path.read_bytes(), path.stat().st_mtime_ns), (content, modified))
-        backups = set(self.home.rglob("*.bak-*"))
+        backups = set(self.state_home.rglob("*"))
         self.assertEqual(self.cli(*args).returncode, 0)
-        self.assertEqual(backups, set(self.home.rglob("*.bak-*")))
+        self.assertEqual(backups, set(self.state_home.rglob("*")))
 
     def test_assistant_install_and_removal_preserve_unrelated_legacy_names(self):
         unrelated = self.home / "personal-assistant"
@@ -398,7 +410,7 @@ class DeploymentTests(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stderr)
         for path in (agent, profile):
             self.assertFalse(path.exists())
-            self.assertEqual(next(path.parent.glob(path.name + ".bak-*")).read_bytes(), expected[path])
+            self.assertEqual(self.backups(path)[0].read_bytes(), expected[path])
         self.assertEqual(claude.read_bytes(), expected[claude])
         self.assertTrue((self.destination / "skills/dogwatch-scope/SKILL.md").exists())
 
@@ -444,7 +456,7 @@ class DeploymentTests(unittest.TestCase):
         self.assertFalse(any(path.exists() for path in self.outputs))
         self.assertFalse(legacy.exists())
         self.assertEqual(unrelated.read_text(), deploy.MARKER + "keep me")
-        self.assertEqual(next(self.destination.glob(legacy.name + ".bak-*")).read_bytes(),
+        self.assertEqual(self.backups(legacy)[0].read_bytes(),
                          (deploy.PREVIOUS_MARKER + "legacy\r\n").encode())
 
     def test_components_only_apply_to_removal_to_avoid_incomplete_migrations(self):
@@ -488,7 +500,7 @@ class DeploymentTests(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertFalse(any(path.exists() for path in files))
         for path in files:
-            self.assertEqual(len(list(path.parent.glob(path.name + ".bak-*"))), 1)
+            self.assertEqual(len(self.backups(path)), 1)
         self.assertEqual(self.cli("--uninstall").returncode, 0)
 
     def test_shared_home_aliases_are_normalized_without_bypassing_symlink_checks(self):
@@ -507,6 +519,209 @@ class DeploymentTests(unittest.TestCase):
         self.assertNotEqual(result.returncode, 0)
         self.assertIn("symlink", result.stderr)
         self.assertFalse((self.destination / "agents/dogwatch-lead.toml").exists())
+
+    def test_backup_batch_preserves_bytes_modes_and_is_private(self):
+        changed = self.destination / "dogwatch-lead.config.toml"
+        retired = self.homes["claude"] / "agents/agentic-lead.md"
+        originals = {changed: b"my config\r\n", retired: (deploy.PREVIOUS_MARKER + "old\r\n").encode()}
+        for path, content in originals.items():
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_bytes(content)
+            path.chmod(0o640)
+        deploy.deploy(self.outputs, retired=(retired,), replace=True)
+        manifests = list(self.state_home.glob("*/manifest.json"))
+        self.assertEqual(len(manifests), 1)
+        manifest = json.loads(manifests[0].read_text())
+        self.assertEqual(set(manifest), {str(path) for path in originals})
+        for path, content in originals.items():
+            saved = Path(manifest[str(path)]["backup"])
+            self.assertEqual(saved.read_bytes(), content)
+            self.assertEqual(manifest[str(path)]["mode"], 0o640)
+            self.assertEqual(stat.S_IMODE(saved.stat().st_mode), 0o600)
+        self.assertEqual(stat.S_IMODE(manifests[0].stat().st_mode), 0o600)
+        self.assertEqual(stat.S_IMODE(manifests[0].parent.stat().st_mode), 0o700)
+        self.assertFalse(list(self.destination.rglob("*.bak-*")))
+        self.assertFalse(list(self.homes["claude"].rglob("*.bak-*")))
+
+    def test_preview_check_and_noop_do_not_create_backup_state(self):
+        path = self.destination / "agents/dogwatch-lead.toml"
+        path.parent.mkdir(parents=True)
+        path.write_text(deploy.MARKER + "old")
+        deploy.deploy(self.outputs, dry_run=True)
+        deploy.deploy(self.outputs, check=True)
+        self.assertFalse(self.state_home.exists())
+        deploy.deploy({path: path.read_text()})
+        self.assertFalse(self.state_home.exists())
+
+    def test_backup_failure_precedes_all_deployment_mutations(self):
+        changed = self.destination / "old"
+        removed = self.destination / "retired"
+        new = self.destination / "new"
+        self.destination.mkdir()
+        for path in (changed, removed):
+            path.write_text(deploy.MARKER + "original")
+        before = {path: path.read_bytes() for path in (changed, removed)}
+        # Fail while syncing a backup, its manifest or its directory.
+        for results in ([None, OSError("disk full")], [None, None, OSError("disk full")],
+                        [None, None, None, OSError("disk full")]):
+            with mock.patch.object(deploy.os, "fsync", side_effect=results):
+                with self.assertRaisesRegex(OSError, "disk full"):
+                    deploy.deploy({new: "new", changed: deploy.MARKER + "changed"}, retired=(removed,))
+            self.assertEqual(before, {path: path.read_bytes() for path in before})
+            self.assertFalse(new.exists())
+
+    def test_state_override_and_symlink_destination(self):
+        with mock.patch.dict(os.environ, {"XDG_STATE_HOME": ""}):
+            self.assertEqual(deploy.default_state_home(), Path.home() / ".local/state/dogwatch")
+        deploy.deploy(self.outputs)
+        path = self.destination / "dogwatch-lead.config.toml"
+        path.write_text(deploy.MARKER + "old")
+        custom = self.home / "custom-state"
+        result = self.cli("--state-home", str(custom))
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(len(list(custom.glob("*/manifest.json"))), 1)
+        self.assertFalse(self.state_home.exists())
+        link = self.home / "state-link"
+        link.symlink_to(custom, target_is_directory=True)
+        path.write_text(deploy.MARKER + "another edit")
+        for destination in (link, link / ".." / "custom-state"):
+            result = self.cli("--state-home", str(destination))
+            self.assertEqual(result.returncode, 2)
+            self.assertIn("symlink backup destination", result.stderr)
+            self.assertEqual(path.read_text(), deploy.MARKER + "another edit")
+
+    def adjacent_backup(self, original, *, suffix="20261118T123456123456Z", content=None):
+        path = original.with_name(original.name + ".bak-" + suffix)
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_bytes(content if content is not None else (deploy.MARKER + "old\r\n").encode())
+        path.chmod(0o640)
+        return path
+
+    def test_backup_migration_is_scoped_repeatable_and_does_not_deploy(self):
+        current = self.destination / "agents/dogwatch-lead.toml"
+        legacy = self.destination / "agentic-lead.config.toml"
+        retired = self.destination / "agents/researcher.toml"
+        skill = self.destination / "skills/dogwatch-scope/SKILL.md"
+        originals = (current, current, legacy, retired, skill)
+        candidates = {
+            self.adjacent_backup(path, suffix=f"20261118T12345612345{n}Z",
+                                 content=("---\n" + deploy.PREVIOUS_MARKER + str(n)).replace("\n", "\r\n").encode()): path
+            for n, path in enumerate(originals)
+        }
+        current.write_text("active local edits")
+        untouched = [current,
+                     self.adjacent_backup(self.destination / "agents/mine.toml"),
+                     self.adjacent_backup(legacy, suffix="manual"),
+                     self.adjacent_backup(retired, suffix="20261118T123457Z", content=b"personal original"),
+                     self.adjacent_backup(self.homes["claude"] / "agents/dogwatch-lead.md")]
+        before = {path: (path.read_bytes(), path.stat().st_mtime_ns) for path in (*candidates, *untouched)}
+        args = ("--migrate-backups", "--target", "codex")
+        result = self.cli(*args, "--dry-run")
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn("Would migrate 5", result.stdout)
+        self.assertEqual(before, {path: (path.read_bytes(), path.stat().st_mtime_ns) for path in before})
+        self.assertFalse(self.state_home.exists())
+        result = self.cli(*args)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn("Preserving unmarked backup", result.stdout)
+        manifest = json.loads(next(self.state_home.glob("*/manifest.json")).read_text())
+        for path, original in candidates.items():
+            self.assertFalse(path.exists())
+            entry = manifest[str(path)]
+            self.assertEqual(Path(entry["backup"]).read_bytes(), before[path][0])
+            self.assertEqual(entry["restore_to"], str(original))
+            self.assertEqual(entry["mode"], 0o640)
+        self.assertEqual({path: before[path] for path in untouched},
+                         {path: (path.read_bytes(), path.stat().st_mtime_ns) for path in untouched})
+        self.assertFalse((self.destination / "dogwatch-assistant.config.toml").exists())
+        state = {path: path.stat().st_mtime_ns for path in self.state_home.rglob("*")}
+        result = self.cli(*args)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(state, {path: path.stat().st_mtime_ns for path in self.state_home.rglob("*")})
+
+    def test_migration_failures_keep_sources(self):
+        originals = [self.destination / "agents/dogwatch-lead.toml",
+                     self.destination / "dogwatch-lead.config.toml"]
+        sources = [self.adjacent_backup(path) for path in originals]
+        before = {path: path.read_bytes() for path in sources}
+        with mock.patch.object(deploy.os, "fsync", side_effect=[None, None, OSError("disk full")]):
+            with self.assertRaisesRegex(OSError, "disk full"):
+                deploy.migrate_backups(self.homes)
+        self.assertEqual(before, {path: path.read_bytes() for path in sources})
+        save = deploy.backup_files
+
+        def change_after_backup(*args, **kwargs):
+            result = save(*args, **kwargs)
+            sources[-1].write_text(deploy.MARKER + "concurrent edit")
+            return result
+
+        with mock.patch.object(deploy, "backup_files", side_effect=change_after_backup):
+            with self.assertRaisesRegex(ValueError, "source changed"):
+                deploy.migrate_backups(self.homes)
+        self.assertTrue(all(path.exists() for path in sources))
+
+        def chmod_after_backup(*args, **kwargs):
+            result = save(*args, **kwargs)
+            sources[-1].chmod(0o600)
+            return result
+
+        with mock.patch.object(deploy, "backup_files", side_effect=chmod_after_backup):
+            with self.assertRaisesRegex(ValueError, "source changed"):
+                deploy.migrate_backups(self.homes)
+        self.assertTrue(all(path.exists() for path in sources))
+
+    def test_migration_rechecks_each_source_immediately_before_removal(self):
+        first = self.adjacent_backup(self.destination / "dogwatch-lead.config.toml")
+        second = self.adjacent_backup(self.destination / "dogwatch-scoper.config.toml")
+        original_read = Path.read_bytes
+        reads = 0
+
+        def read_and_replace(path):
+            nonlocal reads
+            content = original_read(path)
+            if path == second:
+                reads += 1
+                if reads == 1:
+                    replacement = first.with_name("replacement")
+                    replacement.write_bytes(original_read(first))
+                    replacement.replace(first)
+            return content
+
+        with mock.patch.object(Path, "read_bytes", read_and_replace):
+            with self.assertRaisesRegex(ValueError, "source changed"):
+                deploy.migrate_backups(self.homes)
+        self.assertTrue(first.exists())
+        self.assertTrue(second.exists())
+
+    def test_migration_refuses_symlinks_before_moving_anything(self):
+        source = self.adjacent_backup(self.destination / "dogwatch-lead.config.toml")
+        linked = self.destination / "dogwatch-scoper.config.toml.bak-20261118T123456Z"
+        linked.symlink_to(source)
+        result = self.cli("--migrate-backups")
+        self.assertEqual(result.returncode, 2)
+        self.assertIn("symlink backup source", result.stderr)
+        self.assertTrue(source.exists())
+        self.assertFalse(self.state_home.exists())
+        linked.unlink()
+        (self.destination / "agents").symlink_to(self.home)
+        result = self.cli("--migrate-backups")
+        self.assertEqual(result.returncode, 2)
+        self.assertIn("symlink backup directory", result.stderr)
+        self.assertTrue(source.exists())
+        self.assertFalse(self.state_home.exists())
+
+    def test_migration_deduplicates_shared_homes_and_rejects_conflicting_modes(self):
+        self.homes["claude"] = self.destination
+        path = self.adjacent_backup(self.destination / "skills/dogwatch-scope/SKILL.md")
+        for option in ("--uninstall", "--check", "--replace"):
+            result = self.cli("--migrate-backups", option)
+            self.assertNotEqual(result.returncode, 0)
+            self.assertTrue(path.exists())
+            self.assertFalse(self.state_home.exists())
+        result = self.cli("--migrate-backups")
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(len(self.backups(path)), 1)
+        self.assertFalse(path.exists())
 
 
 if __name__ == "__main__":

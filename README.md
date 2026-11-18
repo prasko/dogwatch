@@ -105,9 +105,11 @@ in their tool home's `skills/` directory.
 change these homes. Export custom homes in your shell so new Herdr panes use them too.
 
 Existing files without this repository's generated marker stop deployment; inspect
-the dry run before using `--replace`. Changed files receive adjacent timestamped
-backups. Unrelated configuration and project agents are preserved; generated paths
-refuse symlinks. Make role/skill edits here and redeploy, since updates replace
+the dry run before using `--replace`. Changed or removed files receive private backups
+under `~/.local/state/dogwatch/`, with one timestamped directory and a `manifest.json`
+recording original paths and modes per operation. `XDG_STATE_HOME` or `--state-home`
+changes this location. Unrelated configuration and project agents are preserved;
+generated paths refuse symlinks. Make role/skill edits here and redeploy, since updates replace
 local edits. Deployment migrates marked `agentic-` files and Codex's old unprefixed
 roles to the Dogwatch names, with backups. Retired Researcher files are also removed.
 Unmarked files at old paths are preserved.
@@ -205,6 +207,12 @@ the launcher `bin/`. Check `herdr integration status`, Codex `/status` or Claude
 replies through Herdr. This checks the installed workflow, including socket access.
 
 ## Update and remove
+
+To move older adjacent role/skill backups into the central backup directory, preview
+`python3 scripts/deploy.py --migrate-backups --dry-run`, then repeat without `--dry-run`.
+This moves only marked backups at known package paths; it does not redeploy roles or
+skills. Unmarked backups are left for manual review. The manifest also records each
+backup's `restore_to` path; restore files manually if needed.
 
 After updating this checkout, rerun launcher preview/apply and role deployment.
 Update provider CLIs through their installation method. Use `brew upgrade herdr`

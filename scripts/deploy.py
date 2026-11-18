@@ -6,6 +6,8 @@ from datetime import datetime, timezone
 import json
 import os
 from pathlib import Path
+import re
+import stat
 import sys
 import tempfile
 import tomllib
@@ -190,7 +192,114 @@ def is_managed(text):
                for prefix in ("", "---\n") for marker in (MARKER, PREVIOUS_MARKER, LEGACY_MARKER))
 
 
-def deploy(outputs, *, retired=(), dry_run=False, check=False, replace=False, uninstall=False):
+def default_state_home():
+    return Path(os.environ.get("XDG_STATE_HOME") or Path.home() / ".local/state") / "dogwatch"
+
+
+def file_identity(info):
+    return (info.st_dev, info.st_ino, info.st_mode, info.st_size,
+            info.st_mtime_ns, info.st_ctime_ns)
+
+
+def backup_files(paths, *, state_home=None, restore_to=None):
+    """Save exact bytes and original modes before any source files are changed."""
+    paths = tuple(dict.fromkeys(paths))
+    if not paths:
+        return {}
+    state_home = (state_home if state_home is not None else default_state_home()).expanduser().absolute()
+    if any(path.is_symlink() for path in (state_home, *state_home.parents)):
+        raise ValueError(f"Refusing symlink backup destination: {state_home}")
+    state_home = Path(os.path.abspath(state_home))
+    batch = state_home / datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S%fZ")
+    created = []
+    parent = state_home
+    while not parent.exists():
+        created.append(parent)
+        parent = parent.parent
+    state_home.mkdir(parents=True, exist_ok=True, mode=0o700)
+    batch.mkdir(mode=0o700)
+
+    def save(path, content):
+        with path.open("xb") as handle:
+            os.fchmod(handle.fileno(), 0o600)
+            handle.write(content)
+            handle.flush()
+            os.fsync(handle.fileno())
+
+    manifest, saved = {}, {}
+    for number, path in enumerate(paths):
+        if any(part.is_symlink() for part in (path, *path.parents)):
+            raise ValueError(f"Refusing symlink backup source: {path}")
+        with path.open("rb") as source:
+            info = os.fstat(source.fileno())
+            content = source.read()
+            if file_identity(info) != file_identity(os.fstat(source.fileno())):
+                raise ValueError(f"Backup source changed while reading: {path}")
+        mode = stat.S_IMODE(info.st_mode)
+        destination = batch / f"{number}-{path.name}"
+        save(destination, content)
+        manifest[str(path)] = {"backup": str(destination), "mode": mode}
+        if restore_to is not None:
+            manifest[str(path)]["restore_to"] = str(restore_to[path])
+        saved[path] = (destination, file_identity(info))
+    save(batch / "manifest.json", (json.dumps(manifest, indent=2) + "\n").encode())
+    # Persist backup entries and newly created parent entries before source removal.
+    for directory in dict.fromkeys((batch, state_home, *(path.parent for path in created))):
+        descriptor = os.open(directory, os.O_RDONLY | os.O_DIRECTORY)
+        try:
+            os.fsync(descriptor)
+        finally:
+            os.close(descriptor)
+    print(f"Backups and original modes: {batch / 'manifest.json'}")
+    return saved
+
+
+def migrate_backups(homes, targets=TARGETS, *, state_home=None, dry_run=False):
+    """Relocate marked adjacent backups at known package paths without deploying."""
+    candidates = {}
+    for original in dict.fromkeys(uninstall_paths(homes, targets)):
+        if any(path.is_symlink() for path in original.parents):
+            raise ValueError(f"Refusing symlink backup directory: {original.parent}")
+        for path in sorted(original.parent.glob(original.name + ".bak-*")):
+            suffix = path.name[len(original.name + ".bak-"):]
+            if not re.fullmatch(r"\d{8}T\d{6}(?:\d{6})?Z", suffix):
+                continue
+            if path.is_symlink():
+                raise ValueError(f"Refusing symlink backup source: {path}")
+            if not path.is_file():
+                continue
+            with path.open("rb") as handle:
+                prefix = handle.read(256).decode("utf-8", errors="replace").replace("\r\n", "\n")
+            if is_managed(prefix):
+                candidates[path] = original
+            else:
+                print(f"Preserving unmarked backup: {path}")
+    if not candidates:
+        print("No marked adjacent backups to migrate.")
+        return 0
+    if dry_run:
+        destination = state_home if state_home is not None else default_state_home()
+        print(f"Would migrate {len(candidates)} adjacent backups to {destination}")
+        return 0
+    saved = backup_files(candidates, state_home=state_home, restore_to=candidates)
+
+    def verify(path):
+        backup, identity = saved[path]
+        if (any(part.is_symlink() for part in (path, *path.parents))
+                or path.read_bytes() != backup.read_bytes()
+                or file_identity(path.stat()) != identity):
+            raise ValueError(f"Backup source changed; preserving adjacent copy: {path}")
+    for path in saved:
+        verify(path)
+    for path in saved:
+        verify(path)
+        path.unlink()
+    print(f"Migrated {len(saved)} adjacent backups.")
+    return 0
+
+
+def deploy(outputs, *, retired=(), dry_run=False, check=False, replace=False, uninstall=False,
+           state_home=None):
     """Preflight all collisions; back up changed files and replace each atomically.
 
     `outputs` maps absolute destination paths to content.
@@ -226,20 +335,17 @@ def deploy(outputs, *, retired=(), dry_run=False, check=False, replace=False, un
             print("Installed files match source.")
         return 1 if changes or retirements else 0
 
+    backups = [path for path, _, old in changes if old is not None] + retirements
+    if dry_run and backups:
+        destination = state_home if state_home is not None else default_state_home()
+        print(f"Would back up {len(backups)} files to {destination}")
+    elif not dry_run:
+        backup_files(backups, state_home=state_home)
     for path, content, old in changes:
         print(f"{'Would write' if dry_run else 'Write'} {path}")
         if dry_run:
-            if old is not None:
-                print("  Would back up existing file.")
             continue
         path.parent.mkdir(parents=True, exist_ok=True)
-        if old is not None:
-            stamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S%fZ")
-            backup = path.with_name(f"{path.name}.bak-{stamp}")
-            # Preserve exact bytes in backups, including original line endings.
-            with backup.open("xb") as handle:
-                handle.write(path.read_bytes())
-            print(f"  Backup {backup}")
         temporary = None
         try:
             with tempfile.NamedTemporaryFile(mode="w", encoding="utf-8", dir=path.parent,
@@ -254,12 +360,7 @@ def deploy(outputs, *, retired=(), dry_run=False, check=False, replace=False, un
         action = "Remove" if uninstall else "Retire"
         print(f"{'Would ' + action.lower() if dry_run else action} {path}")
         if not dry_run:
-            stamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S%fZ")
-            backup = path.with_name(f"{path.name}.bak-{stamp}")
-            with backup.open("xb") as handle:
-                handle.write(path.read_bytes())
             path.unlink()
-            print(f"  Backup {backup}")
     if not changes and not retirements:
         print("Already up to date.")
     return 0
@@ -316,6 +417,8 @@ def warn_skill_dependencies(homes, targets):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--uninstall", action="store_true", help="Remove only marked package files, with backups")
+    parser.add_argument("--migrate-backups", action="store_true",
+                        help="Move marked adjacent backups to the state directory without deploying")
     parser.add_argument("--component", choices=("roles", "skills", "all"), default="all",
                         help="With --uninstall: roles (including profiles), skills, or both (default: all)")
     parser.add_argument("--target", choices=(*TARGETS, "all"), default="all",
@@ -325,11 +428,15 @@ def main():
     parser.add_argument("--claude-home", type=Path,
                         default=Path(os.environ.get("CLAUDE_CONFIG_DIR",
                                                     str(Path.home() / ".claude"))))
+    parser.add_argument("--state-home", type=Path, default=default_state_home(),
+                        help="Backup directory (default: $XDG_STATE_HOME/dogwatch or ~/.local/state/dogwatch)")
     mode = parser.add_mutually_exclusive_group()
     mode.add_argument("--dry-run", action="store_true", help="Show changes without writing")
     mode.add_argument("--check", action="store_true", help="Exit 1 if installed files differ")
     parser.add_argument("--replace", action="store_true", help="Back up and replace unmanaged collisions")
     args = parser.parse_args()
+    if args.migrate_backups and (args.uninstall or args.check or args.replace):
+        parser.error("--migrate-backups cannot be combined with --uninstall, --check or --replace")
     if args.uninstall and (args.check or args.replace):
         parser.error("--uninstall cannot be combined with --check or --replace")
     if args.component != "all" and not args.uninstall:
@@ -344,6 +451,8 @@ def main():
             if any(path.is_symlink() for path in (home, *home.parents)):
                 raise ValueError(f"Refusing symlink destination: {home}")
         homes = {target: Path(os.path.abspath(home)) for target, home in homes.items()}
+        if args.migrate_backups:
+            return migrate_backups(homes, targets, state_home=args.state_home, dry_run=args.dry_run)
         if (homes["codex"] == homes["claude"] and args.target != "all" and not args.check
                 and not (args.uninstall and args.component == "roles")):
             parser.error("Provider homes share skill files; use --target all when changing skills, "
@@ -352,10 +461,10 @@ def main():
             if args.component == "skills":
                 warn_skill_dependencies(homes, targets)
             return deploy({}, retired=uninstall_paths(homes, targets, args.component),
-                          dry_run=args.dry_run, uninstall=True)
+                          dry_run=args.dry_run, uninstall=True, state_home=args.state_home)
         return deploy(resolve(render(targets=targets), homes),
                       dry_run=args.dry_run, retired=retired_paths(homes, targets),
-                      check=args.check, replace=args.replace)
+                      check=args.check, replace=args.replace, state_home=args.state_home)
     except (OSError, ValueError) as error:
         print(f"Deployment failed: {error}", file=sys.stderr)
         return 2
