@@ -181,11 +181,19 @@ for their workflows.
   or project configuration: they override the socket exception. For Claude, choose
   `--permission-mode manual` or `--permission-mode auto`, or set
   `permissions.defaultMode` in [settings.json](https://code.claude.com/docs/en/settings-reference).
-- **Models and compaction:** edit tiers in [codex/roles.toml](codex/roles.toml) or
+- **Models:** edit tiers in [codex/roles.toml](codex/roles.toml) or
   [claude/roles.toml](claude/roles.toml) and redeploy. Select models your account
-  supports. Codex profiles request an 872k context ceiling and compact at 400k;
-  actual capacity depends on the model. The Claude launch above requests 1M for
-  Lead. For Sonnet sessions, `/autocompact 400000` saves a per-model preference
+  supports.
+- **Codex context limits:** profiles request an 872k context ceiling and compact at
+  400k. These overrides do not grant extra model or account access. Check current
+  [model support](https://learn.chatgpt.com/docs/models?surface=cli) and
+  [plan availability](https://learn.chatgpt.com/docs/pricing) before relying on them,
+  including whether your setup needs a Pro subscription or separately billed API key.
+  If unsupported, lower `model_context_window` and `model_auto_compact_token_limit`
+  in [codex/roles.toml](codex/roles.toml), keeping compaction below the context limit,
+  or remove both overrides to use model defaults; then redeploy.
+- **Claude compaction:** the Claude Lead launch above requests 1M. For Sonnet
+  sessions, `/autocompact 400000` saves a per-model preference
   under `modelSettings` in `settings.json`. See [Claude's settings reference](https://code.claude.com/docs/en/settings-reference#modelsettings).
 - **Compatibility:** the launcher interfaces target Herdr TUI 0.9.5, Codex 0.169.0
   and Claude Code 2.1.326 on macOS. Project and managed settings can affect the
