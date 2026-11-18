@@ -74,16 +74,23 @@ class DeploymentTests(unittest.TestCase):
             self.assertIn("## Claude Code notes", body)
             self.assertNotIn("Codex", body)
 
-    def test_lead_receives_the_same_contracts_as_agent_descriptions(self):
-        lead = tomllib.loads(self.rendered["codex"]["dogwatch-lead.config.toml"])
-        claude_lead = self.rendered["claude"]["agents/dogwatch-lead.md"]
+    def test_coordinators_receive_only_their_child_role_contracts(self):
+        children = {"assistant": ("lead",),
+                    "lead": ("scoper", "architect", "developer", "tester", "validator", "reviewer")}
         for role in deploy.ROLES:
             agent = tomllib.loads(self.rendered["codex"][f"agents/dogwatch-{role}.toml"])
-            if role != "lead":
-                contract = f"- **{role.title()}:** {agent['description']}"
-                self.assertIn(contract, lead["developer_instructions"])
-                self.assertIn(contract, claude_lead)
-                self.assertNotIn("## Delegated role contracts", agent["developer_instructions"])
+            for content in (agent["developer_instructions"],
+                            self.rendered["claude"][f"agents/dogwatch-{role}.md"]):
+                if role not in children:
+                    self.assertNotIn("## Delegated role contracts", content)
+                    continue
+                contracts = content.split("## Delegated role contracts\n\n", 1)[1].split("\n\n", 1)[0]
+                expected = []
+                for child in children[role]:
+                    description = tomllib.loads(
+                        self.rendered["codex"][f"agents/dogwatch-{child}.toml"])["description"]
+                    expected.append(f"- **{child.title()}:** {description}")
+                self.assertEqual(contracts.splitlines(), expected)
 
     def test_tiers_resolve_to_models_and_role_overrides_win(self):
         def settings(target, role):
@@ -93,10 +100,14 @@ class DeploymentTests(unittest.TestCase):
             return {key: value.strip('"') for key, value in
                     (line.split(": ", 1) for line in frontmatter.splitlines()[2:])}
         self.assertEqual(settings("claude", "lead")["model"], "opus")
+        self.assertEqual(settings("claude", "assistant")["model"], "sonnet")
+        self.assertEqual(settings("claude", "assistant")["effort"], "high")
         self.assertEqual(settings("claude", "developer")["model"], "sonnet")
         self.assertEqual(settings("claude", "developer")["effort"], "high")
         self.assertEqual(deploy._load_runtime(deploy.ROOT, "claude")[1]["fast"]["model"], "haiku")
         self.assertEqual(settings("codex", "reviewer")["model"], "gpt-6.1-sol")
+        self.assertEqual(settings("codex", "assistant")["model"], "gpt-6.1-sol")
+        self.assertEqual(settings("codex", "assistant")["model_reasoning_effort"], "high")
         self.assertEqual(settings("codex", "architect")["model"], "gpt-6-astra")
 
         root = self.home / "src"
@@ -360,6 +371,45 @@ class DeploymentTests(unittest.TestCase):
         backups = set(self.home.rglob("*.bak-*"))
         self.assertEqual(self.cli(*args).returncode, 0)
         self.assertEqual(backups, set(self.home.rglob("*.bak-*")))
+
+    def test_assistant_install_and_removal_preserve_unrelated_legacy_names(self):
+        unrelated = self.home / "personal-assistant"
+        original = deploy.PREVIOUS_MARKER + "personal assistant\n"
+        unrelated.write_text(original)
+        bare = self.destination / "agents/assistant.toml"
+        bare.parent.mkdir(parents=True)
+        bare.symlink_to(unrelated)
+        aliases = (self.destination / "agentic-assistant.config.toml",
+                   self.homes["claude"] / "agents/agentic-assistant.md")
+        for path in aliases:
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_text(original)
+
+        result = self.cli()
+        self.assertEqual(result.returncode, 0, result.stderr)
+        agent = self.destination / "agents/dogwatch-assistant.toml"
+        profile = self.destination / "dogwatch-assistant.config.toml"
+        claude = self.homes["claude"] / "agents/dogwatch-assistant.md"
+        self.assertTrue(all(path.is_file() for path in (agent, profile, claude)))
+        self.assertEqual(self.cli("--check").returncode, 0)
+        expected = {path: path.read_bytes() for path in (agent, profile, claude)}
+
+        result = self.cli("--uninstall", "--target", "codex", "--component", "roles")
+        self.assertEqual(result.returncode, 0, result.stderr)
+        for path in (agent, profile):
+            self.assertFalse(path.exists())
+            self.assertEqual(next(path.parent.glob(path.name + ".bak-*")).read_bytes(), expected[path])
+        self.assertEqual(claude.read_bytes(), expected[claude])
+        self.assertTrue((self.destination / "skills/dogwatch-scope/SKILL.md").exists())
+
+        result = self.cli("--uninstall")
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertFalse(claude.exists())
+        self.assertTrue(bare.is_symlink())
+        self.assertEqual(unrelated.read_text(), original)
+        for path in aliases:
+            self.assertEqual(path.read_text(), original)
+            self.assertFalse(list(path.parent.glob(path.name + ".bak-*")))
 
     def test_uninstall_skills_warns_about_remaining_roles_and_preserves_unmarked_files(self):
         deploy.deploy(self.outputs)

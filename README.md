@@ -1,9 +1,10 @@
 # Dogwatch
 
-A coordinated coding workflow for Codex and Claude Code in **Herdr TUI**. Give Lead
-a task; it works directly or brings in specialists for scope, design, development,
-testing, validation and independent review. This repository supplies the roles,
-workflow skills and sandboxed launchers. Reviewr gives you a diff pane for feedback.
+A coordinated coding workflow for Codex and Claude Code in **Herdr TUI**. Open
+Assistant in your primary checkout to launch Leads in task worktrees. Each Lead
+works directly or brings in specialists for scope, design, development, testing,
+validation and independent review. This repository supplies the roles, workflow
+skills and sandboxed launchers. Reviewr gives you a diff pane for feedback.
 
 ## Mac setup
 
@@ -113,7 +114,28 @@ Unmarked files at old paths are preserved.
 
 ## Use
 
-Start `herdr`, open your project, and start Lead in a fresh pane:
+Start `herdr`, open your primary checkout, and start Assistant in a fresh pane:
+
+```sh
+codex --profile dogwatch-assistant -C /path/to/repo
+# Or Claude:
+cd /path/to/repo && claude --agent dogwatch-assistant
+```
+
+- Give Assistant an issue or task, such as “Open a Lead for issue #123.” It creates
+  or reuses the task's worktree and opens Lead there.
+- **Lead waits for you to choose who scopes: Lead itself or a dedicated Scoper.**
+  “Open #123 and have Scoper scope it” already makes that choice; existing scope/plans
+  and approvals also carry through.
+- Discuss the task directly with Lead; Assistant tracks its status and worktree.
+- For GitHub issue/PR input, install the [GitHub CLI](https://cli.github.com/)
+  (`brew install gh`) and sign in with `gh auth login`.
+- After merge, the parent checks the merge and remaining local files, including ignored
+  notes, then offers one cleanup confirmation for the task's agents, worktree and local
+  branch. Completed work is kept until its merge and cleanup are confirmed.
+- Lead manages its specialists; Assistant finishes removing the task workspace.
+
+You can also start Lead directly in an existing project or worktree:
 
 ```sh
 codex --profile dogwatch-lead -C /path/to/project
@@ -121,20 +143,21 @@ codex --profile dogwatch-lead -C /path/to/project
 cd /path/to/project && CLAUDE_CODE_AUTO_COMPACT_WINDOW=1000000 claude --agent dogwatch-lead
 ```
 
-Give Lead a task, for example: “Investigate why this test fails, propose a fix,
-then implement it after we agree.” It chooses the workflow and delegates bounded
-work. Interactive specialists use separate Herdr tabs; background specialists run
-as subagents. Reviewer works independently. An agreed implementation plan can cover
-tests and validation too; a new agent does not require repeating approval.
-
-Your user/project `AGENTS.md` and `CLAUDE.md` also govern the agents. For Codex,
-ask for delegation in your task or applicable `AGENTS.md`/skill instructions;
-role instructions alone may not enable it. The roles contain the delegation details.
-Profiles and `--agent` apply to sessions started with them, including standalone
-specialists; they do not turn every conversation into Lead.
+- Give Lead a task, for example: “Scope why this test fails yourself, propose a fix,
+  then implement it after we agree.” It chooses the workflow and delegates bounded work.
+- Interactive specialists use separate Herdr tabs; background specialists run as
+  subagents. Reviewer works independently.
+- An agreed implementation plan can cover tests and validation; a new agent does not
+  require repeating approval.
+- Your user/project `AGENTS.md` and `CLAUDE.md` also govern the agents. For Codex, ask
+  for delegation in your task or applicable `AGENTS.md`/skill instructions; role
+  instructions alone may not enable it. The roles contain the delegation details.
+- Profiles and `--agent` apply to sessions started with them, including standalone
+  specialists; they do not turn every conversation into Lead.
 
 | Role | Responsibility |
 | --- | --- |
+| Assistant | Open and track Leads in task worktrees; coordinate cleanup after merge. |
 | Lead | Choose the workflow, retain decisions and coordinate handoffs. |
 | Scoper | Investigate the problem and clarify requirements. |
 | Architect | Develop the approach and obtain design review. |
@@ -144,7 +167,8 @@ specialists; they do not turn every conversation into Lead.
 | Reviewer | Independently assess the assigned artifact. |
 
 Codex background roles, interactive profiles and Claude agents all use names such
-as `dogwatch-reviewer`. See [Lead](roles/lead.md) for the full workflow.
+as `dogwatch-reviewer`. See [Assistant](roles/assistant.md) and [Lead](roles/lead.md)
+for their workflows.
 
 ## Preferences and compatibility
 

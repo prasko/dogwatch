@@ -4,7 +4,8 @@
 - Each role has a CLI profile `dogwatch-<role>` for interactive sessions and a custom
   subagent role with the same name for non-interactive work. For example, use
   `dogwatch-scoper` for scoping and `dogwatch-reviewer` for independent reviews.
-- Start an interactive specialist through Herdr in an available shell pane:
+- Assistant and Lead normally run interactively. Assistant opens Leads; Lead opens
+  specialists. Start the assigned role through Herdr in a shell pane in its worktree:
   `herdr agent start <unique-name> --kind codex --pane <pane-id> -- --profile dogwatch-<role>`.
 - Interactive profiles start on their role's default tier. To use another tier,
   append `-m <model> -c model_reasoning_effort=<effort>` from the table below.

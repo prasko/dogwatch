@@ -2,6 +2,10 @@
 # Tiers (fast, standard, deep, special) map to concrete models in codex/roles.toml and
 # claude/roles.toml.
 
+[assistant]
+description = "Manage task worktrees and interactive Leads from the primary checkout; carry user decisions into handoffs and coordinate confirmed cleanup. Leave task scoping and delivery to Lead."
+tier = "standard"
+
 [lead]
 description = "Own a task lifecycle: choose and adapt the workflow, scope and plan or delegate, retain decisions and track evidence."
 tier = "deep"

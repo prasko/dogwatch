@@ -10,7 +10,8 @@
 - For research, use a generic `general-purpose` subagent with the fast tier's model
   and effort. Instruct it to read the installed `dogwatch-research/SKILL.md`, supplying
   its resolved path and a bounded question; no custom Researcher agent is needed.
-- Start an interactive specialist through Herdr in an available shell pane:
+- Assistant and Lead normally run interactively. Assistant opens Leads; Lead opens
+  specialists. Start the assigned role through Herdr in a shell pane in its worktree:
   `herdr agent start <unique-name> --kind claude --pane <pane-id> -- --agent dogwatch-<role>`.
 - To use a non-default tier, append `--model <model> --effort <effort>` from the table
   below to the launch, or pass the Agent tool's `model` and `effort` for a subagent.

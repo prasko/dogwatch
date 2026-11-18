@@ -18,6 +18,7 @@ effort = "medium"
 model = "fable"
 effort = "medium"
 
+[roles.assistant]
 [roles.lead]
 [roles.scoper]
 [roles.architect]
