@@ -1,6 +1,6 @@
 # Shared role descriptions and default model tiers. Role behavior lives in roles/*.md.
 # Tiers (fast, standard, deep, special) map to concrete models in codex/roles.toml and
-# claude/roles.toml. See docs/model-selection.md.
+# claude/roles.toml.
 
 [lead]
 description = "Own a task lifecycle: choose and adapt the workflow, scope and plan or delegate, retain decisions and track evidence."

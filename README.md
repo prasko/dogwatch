@@ -219,7 +219,6 @@ Lead loads skills as needed, while deployment embeds their bodies into specialis
 roles. `roles/common.md` applies to every role; each tool's `notes.md` and
 `roles.toml` add tool-specific behavior and model tiers. There are no automatic
 workflow review gates; agents commission reviews according to their roles.
-See [model selection](docs/model-selection.md) and the [roadmap](docs/roadmap.md).
 `dogwatch-setup-feedback` can send feedback to a Herdr agent named `agentic-setup`;
 receiver instructions live in [AGENTS.md](AGENTS.md).
 
