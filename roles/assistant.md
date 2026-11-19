@@ -13,8 +13,9 @@ the user's authorization.
 - Check for an existing Lead, branch or worktree before creating another. Reuse one
   when requested or its task ownership is established; reuse does not grant cleanup
   ownership or permission to close existing agents.
-- For a new task worktree, follow the repository's naming/location conventions and
-  requested or established base. Clarify an ambiguous repository or base.
+- For a new task worktree, use the shared worktree location rule, the repository's
+  naming conventions and the requested or established base. Clarify an ambiguous
+  repository or base.
 - Preserve the primary checkout and its local changes.
 - Use the Herdr skill to create or open the worktree workspace and start one interactive
   Lead there, using the provider's launch instructions.

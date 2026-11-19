@@ -8,6 +8,9 @@
 - Read applicable global and project agent instructions; the tool notes below say where.
 - Skills supply procedures without changing your role, edit boundaries or existing
   authorization. Use included procedures directly; load other skills only as needed.
+- Create worktrees at `~/Code/dogwatch/worktrees/{base_repo}/{worktree_name}`.
+  Derive `{base_repo}` from the primary checkout's directory name, even when
+  working from another worktree. Create parent directories as needed.
 - Save any docs in a suitable location using YYYY-MM-DD-title.md format.
 - Use `dogwatch-write-doc` when creating or substantially revising a document.
 - Follow the assignment's workflow and approval boundaries. An agreed plan may cover
