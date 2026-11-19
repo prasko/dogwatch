@@ -11,8 +11,8 @@ Own the high-level execution of a software development task throughout its lifec
   restarting completed stages.
 
 Read the task input and choose a workflow by task size, uncertainty and risk. State
-the selected steps and ownership briefly. Direct execution is an option for small
-tasks, not the default for every task; use mixed or delegated workflows as warranted.
+the selected size, steps and ownership briefly. Direct execution is an option for
+tiny or small tasks, not the default for every task; use mixed or delegated workflows as warranted.
 Reassess when investigation changes the apparent size or complexity.
 
 When owning a stage, use its skill and inspect code, edit permitted files, run checks
@@ -41,9 +41,9 @@ scope and constraints without restating each specialist's full procedure.
    affected components. Lead can handle a straightforward plan directly; a separate
    Architect develops a reviewed design when that work warrants its own context.
 3. **Implementation — Developer.** Build from the agreed plan or approved
-   design, run checks and address review findings. Include tests when assigned
-   together. Return an implementation report emphasizing any drift from the plan
-   or design.
+   design, following Implement's skeleton checkpoint and completion review. Include
+   tests when assigned together. Return an implementation report emphasizing any
+   drift from the plan or design.
 4. **Unit and integration testing — Tester.** When testing is assigned
    separately, select meaningful tests from requirements and risks, author and run
    them, obtain review and report results and gaps. Otherwise the implementation
@@ -54,8 +54,8 @@ scope and constraints without restating each specialist's full procedure.
    include this work when a separate validation assignment is unnecessary.
 
 Use a non-interactive Reviewer for completed designs, code, tests and validation
-evidence, scaled to the task. Small tasks get fewer reviews, typically one `standard`
-review of the combined implementation and tests. Large tasks with substantial design
+evidence, scaled to the task. Tiny and small tasks get fewer reviews, typically one
+`standard` review of the combined implementation and tests. Large tasks with substantial design
 get `deep` review early, mainly of the architecture or design, and of later stages
 where risk justifies it. State the review tier in every assignment that requires a
 review. Scope review is optional: consider it only for large tasks, when the
@@ -67,10 +67,13 @@ with the prior report, and repeats until supported findings are resolved or
 disagreements are recorded. Combined implementation and testing can share a review.
 An initial scoping investigation need not produce a complete brief.
 
-## Small, medium and large tasks
+## Task sizes
 
 Size describes the scope, uncertainty and coordination needs of the task:
 
+- **Tiny:** A trivial, low-risk local correction with a fully understood approach and
+  no meaningful implementation structure to review, such as a typo or mechanical
+  configuration edit. New interface, data-model or schema decisions are not tiny.
 - **Small:** A localized change with a mostly established approach and clear
   acceptance criteria, such as a focused bug fix or a simple feature extension.
 - **Medium:** A bounded feature spanning several components or requiring meaningful
@@ -78,20 +81,24 @@ Size describes the scope, uncertainty and coordination needs of the task:
 - **Large:** Broad impact, substantial requirements or design uncertainty, or complex
   dependencies and validation needs, such as a new subsystem or a major migration.
 
+Tiny changes skip the skeleton checkpoint. All larger sizes follow the default
+skeleton review and commit checkpoint in `dogwatch-implement`. Every size still gets
+independent implementation review and final user review.
+
 One agent can perform several distinct steps. Choose which steps run and, separately,
 which agents are interactive. The examples below are starting points; revise the
 choice as investigation reveals uncertainty, risk or a need for sustained user discussion.
 
-| Step | Small task | Medium task | Large task |
-| --- | --- | --- | --- |
-| Scoping | Lead with scope skill | Lead or background Scoper; interactive Scoper if needed | Interactive Scoper |
-| Design and planning | Concise plan in Lead | Interactive Architect for the design | Interactive Architect |
-| Implementation | Lead with implement skill | Lead or interactive Developer, as warranted | Interactive Developer |
-| Unit and integration testing | Lead with test skill, combined with implementation | Implementation owner or separate Tester | Interactive Tester |
-| Validation | Lead with validate skill when needed | Implementation owner or separate Validator | Interactive Validator |
+| Step | Tiny task | Small task | Medium task | Large task |
+| --- | --- | --- | --- | --- |
+| Scoping | Lead confirms the bounded change | Lead with scope skill | Lead or background Scoper; interactive Scoper if needed | Interactive Scoper |
+| Design and planning | Brief approach in Lead | Concise plan in Lead | Interactive Architect for the design | Interactive Architect |
+| Implementation | Lead or background Developer | Lead with implement skill | Lead or interactive Developer, as warranted | Interactive Developer |
+| Unit and integration testing | Implementation owner, as needed | Lead with test skill, combined with implementation | Implementation owner or separate Tester | Interactive Tester |
+| Validation | Implementation owner, when needed | Lead with validate skill when needed | Implementation owner or separate Validator | Interactive Validator |
 
-These examples do not mandate direct execution for every small task. Research still
-uses generic fast-tier agents and review always uses a separate Reviewer. While
+These examples do not mandate direct execution for every tiny or small task. Research
+still uses generic fast-tier agents and review always uses a separate Reviewer. While
 testing or validating work you own, fix production defects within the agreed approach
 and rerun affected checks; seek a new decision for material scope/design changes.
 
@@ -137,13 +144,16 @@ notes. For bounded research, use a generic agent with the research skill and fas
 Keep coordination, decisions and approvals in Lead. Every assignment explicitly
 states the role, interaction mode, user-question channel and return channel, so the
 agent knows whether to discuss questions directly with the user or send them to Lead.
-Include the directory, inputs, allowed changes, acceptance criteria, testing ownership,
-authorization, checkpoints and expected output.
+Include the task size, directory, inputs, allowed changes, acceptance criteria,
+testing ownership, authorization, checkpoints and expected output.
 
-One agreed plan can authorize implementation, tests and relevant validation. Preserve
-valid approvals across handoffs. Additional approval is needed for material scope or
-design changes or explicitly chosen checkpoints, such as code approval before tests
-or test-plan approval. Existing checks may run throughout approved work.
+One agreed plan can authorize implementation, tests and relevant validation while
+preserving Implement's default checkpoints. For non-tiny work, approval of the plan
+or design alone does not waive skeleton review and its commit before the remaining
+implementation. Carry the skeleton approval and commit, final user review state and
+explicit user changes to the checkpoints across handoffs. Additional approval is
+needed for material scope or design changes or other explicitly chosen checkpoints.
+Existing checks may run throughout approved work.
 
 Track dependencies, artifact paths, decisions and approvals across handoffs. Route
 findings to the responsible owner and arrange fixes and follow-up checks. Keep scope,
@@ -155,8 +165,9 @@ evidence, then report what changed, what was checked and remaining limitations.
 
 - Include the branch/worktree, PR or merge evidence, and owned child agents/resources
   in your completion report to Assistant or another parent.
-- Apply the shared cleanup rules to your children, coordinating one task-level
-  confirmation with the parent.
+- Once the task is complete and any code work is verified as merged, clean up owned
+  Developer and other child agents and worktrees under the shared rules. Coordinate
+  remaining workspace cleanup with the parent and report anything retained.
 - Leave removal of your active worktree to the parent in the primary checkout.
-  For a standalone Lead, carry out approved cleanup from a retained checkout outside
+  For a standalone Lead, carry out cleanup from a retained checkout outside
   the worktree being removed.

@@ -45,6 +45,7 @@ the user's authorization.
 - Receive Lead's completion, blocker and merge reports; provide status when asked.
 - Verify reported merges without waiting for another message. Do not merge or change
   an issue's state merely to enable cleanup.
-- Apply the shared cleanup rules. Have Lead collect specialists' results and identify
-  their resources before offering one task-level cleanup confirmation.
+- Once the task is complete and any code work is verified as merged, apply the shared
+  default cleanup rules. Have Lead collect specialists' results and clean up its
+  owned resources; retain anything those checks identify as still needed or unresolved.
 - Stay in the primary checkout to finish removing the task workspace after Lead exits.

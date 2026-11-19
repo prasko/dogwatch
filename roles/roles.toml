@@ -3,7 +3,7 @@
 # claude/roles.toml.
 
 [assistant]
-description = "Manage task worktrees and interactive Leads from the primary checkout; carry user decisions into handoffs and coordinate confirmed cleanup. Leave task scoping and delivery to Lead."
+description = "Manage task worktrees and interactive Leads from the primary checkout; carry user decisions into handoffs and coordinate task workspace cleanup. Leave task scoping and delivery to Lead."
 tier = "standard"
 
 [lead]

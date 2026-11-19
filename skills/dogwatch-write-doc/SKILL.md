@@ -25,13 +25,12 @@ the document, its purpose and intended audience, with supporting material for la
 
 ## Choose what matters
 
-- **Start small:** default to a few bullets highlighting the key problems, decisions
-  or outcomes.
+- **Start small:** make the first draft brief while covering the agreed structure
+  and depth. Select the key explanations instead of compressing every available detail.
 - **State the change first:** plainly say what is changing before explaining why
   or how. For a rename, give the old-to-new mapping before migration steps.
-- **Expand on request:** for larger documents, start with a compact outline and
-  overview. Let the user request details; honor depth already explicitly requested
-  and the task's discussion and approval flow.
+- **Expand on request:** let the user request more detail; honor depth already
+  explicitly requested and the task's drafting, discussion and approval flow.
 - **Explain decisions:** capture non-obvious reasoning and consequences. Link to
   code and evidence instead of narrating or repeating them.
 - **Trim:** remove repetition, conversation history and speculative additions.

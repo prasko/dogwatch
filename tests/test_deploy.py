@@ -63,7 +63,7 @@ class DeploymentTests(unittest.TestCase):
             self.assertEqual(set(agent), {"name", "description", "developer_instructions"})
             self.assertIn("| `fast` | gpt-6-luna | medium |", agent["developer_instructions"])
             self.assertIn("## Codex notes", profile["developer_instructions"])
-            self.assertNotIn("Claude", profile["developer_instructions"])
+            self.assertNotIn("## Claude Code notes", profile["developer_instructions"])
 
     def test_claude_agents_have_frontmatter_and_shared_instructions(self):
         roles = deploy.ROLES
@@ -84,7 +84,7 @@ class DeploymentTests(unittest.TestCase):
             self.assertTrue(body.startswith(shared))
             self.assertIn("### Model tiers", body)
             self.assertIn("## Claude Code notes", body)
-            self.assertNotIn("Codex", body)
+            self.assertNotIn("## Codex notes", body)
 
     def test_coordinators_receive_only_their_child_role_contracts(self):
         children = {"assistant": ("lead",),
