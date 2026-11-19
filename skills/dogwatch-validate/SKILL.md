@@ -9,9 +9,11 @@ Inspect acceptance criteria, the agreed approach, changes and existing evidence.
 Choose complete scenarios with expected outcomes; startup or a health check alone
 does not establish feature correctness. Reuse suitable existing acceptance evidence.
 
-Follow repository setup instructions to run a throwaway instance. Use fake data and
-existing fixtures where suitable. Track resources created for this run and avoid
-affecting unrelated resources. Stay within the assigned execution authorization.
+Follow repository setup instructions to run a throwaway instance. When validating in
+a worktree, copy `.env` from the primary checkout if it exists and the worktree has
+no `.env` yet. Use fake data and existing fixtures where suitable. Track resources
+created for this run and avoid affecting unrelated resources. Stay within the
+assigned execution authorization.
 
 Exercise real interfaces. Record expected versus actual outcomes, useful evidence,
 failures, untested paths and substituted dependencies. Do not claim substituted
