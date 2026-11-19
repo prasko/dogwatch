@@ -165,6 +165,46 @@ Codex background roles, interactive profiles and Claude agents all use names suc
 as `dogwatch-reviewer`. See [Assistant](roles/assistant.md) and [Lead](roles/lead.md)
 for their workflows.
 
+### Project configuration and periodic checks
+
+Project settings live in [dogwatch.toml](dogwatch.toml) at the repository root.
+Every role uses the optional top-level `todo_file` when working with the backlog;
+its path is relative to that root. This repository uses [docs/todo.md](docs/todo.md).
+Other projects can provide their own `dogwatch.toml`; omit `todo_file` to keep their
+existing conventions. The configuration is read from each checkout, so commit it
+if task worktrees should inherit it.
+
+The optional `[assistant.watch]` table enables periodic checks while an interactive
+Assistant is open. `pull_requests`, `issues` and `scan_todo` each default to `false`;
+`interval_minutes` defaults to 30 and must be a positive integer. `scan_todo` requires
+`todo_file`. Without enabled sources, nothing is scheduled. GitHub checks require
+an established GitHub remote and authenticated `gh`.
+
+Assistant reports new actionable PR/issue information and asks a fast research
+subagent for up to three small todo candidates. It skips unchanged scans and avoids
+repeating findings. These are suggestions; selecting a task still goes through the
+normal Lead workflow.
+
+- **Codex:** reinstall the launchers after updating this checkout, then start with
+  `--profile dogwatch-assistant` in Herdr. Start a fresh session in the intended
+  checkout: `resume`, `fork` and `--worktree` launches do not start timers because
+  Codex may choose a different checkout. A timer child of that CLI sends checks
+  while Herdr reports it idle or done. It stops when the CLI exits, the session
+  identity changes, or all sources are disabled. Busy ticks are skipped. Herdr's
+  status check and prompt submission are separate operations, so a user turn can
+  start between them; uncertain deliveries are not retried. Removing or invalidating
+  the configuration stops the timer; restart Assistant after fixing or re-enabling it.
+- **Claude:** on its first turn, Assistant uses native session-scoped scheduling
+  tools and reconciles existing timers on resume. Checks wait for an idle session;
+  nothing executes while it is closed. Pending timers may be restored on resume.
+  `CLAUDE_CODE_DISABLE_CRON=1` makes scheduling unavailable. See the
+  [scheduled-task lifecycle](https://code.claude.com/docs/en/scheduled-tasks#limitations).
+
+Cadence is approximate. Assistant keeps its last-seen state in the session, including
+compaction handoffs. A new session establishes a new baseline. Asking to pause skips
+checks; on Codex, the launcher may still send timer prompts until all sources are
+disabled or the session exits.
+
 ## Default user checkpoints
 
 Existing approvals carry across handoffs, and you can change these defaults for a task.
@@ -199,14 +239,11 @@ and [Implement](skills/dogwatch-implement/SKILL.md) procedures, and the
 - **Models:** edit tiers in [codex/roles.toml](codex/roles.toml) or
   [claude/roles.toml](claude/roles.toml) and redeploy. Select models your account
   supports.
-- **Codex context limits:** profiles request an 872k context ceiling and compact at
-  400k. These overrides do not grant extra model or account access. Check current
-  [model support](https://learn.chatgpt.com/docs/models?surface=cli) and
-  [plan availability](https://learn.chatgpt.com/docs/pricing) before relying on them,
-  including whether your setup needs a Pro subscription or separately billed API key.
-  If unsupported, lower `model_context_window` and `model_auto_compact_token_limit`
-  in [codex/roles.toml](codex/roles.toml), keeping compaction below the context limit,
-  or remove both overrides to use model defaults; then redeploy.
+- **Codex context limits:** profiles compact at 250k tokens without overriding the
+  context window. Adjust `model_auto_compact_token_limit` in
+  [codex/roles.toml](codex/roles.toml) and redeploy, keeping the threshold below the
+  [selected model's context window](https://learn.chatgpt.com/docs/models?surface=cli).
+  Remove the compaction override to use each model's default compaction behavior.
 - **Claude compaction:** the Claude Lead launch above requests 1M. For Sonnet
   sessions, `/autocompact 400000` saves a per-model preference
   under `modelSettings` in `settings.json`. See [Claude's settings reference](https://code.claude.com/docs/en/settings-reference#modelsettings).
@@ -270,7 +307,8 @@ method if no longer needed. Keep provider credentials and other configuration.
 Shared role contracts live in `roles/`; reusable procedures live in `skills/`.
 Lead loads skills as needed, while deployment embeds their bodies into specialist
 roles. `roles/common.md` applies to every role; each tool's `notes.md` and
-`roles.toml` add tool-specific behavior and model tiers. There are no automatic
+`roles.toml` add tool-specific behavior and model tiers. Each tool's `assistant.md`
+adds timer instructions only to Assistant. There are no automatic
 workflow review gates; agents commission reviews according to their roles.
 `dogwatch-setup-feedback` can send feedback to a Herdr agent named `agentic-setup`;
 receiver instructions live in [AGENTS.md](AGENTS.md).

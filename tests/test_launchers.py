@@ -76,7 +76,8 @@ class LauncherTests(unittest.TestCase):
 
     def test_uninstall_preview_preserves_files_and_backups(self):
         self.install()
-        paths = [self.shell_rc, self.package / "launcher.py", *self.package.glob("bin/*")]
+        paths = [self.shell_rc, self.package / "launcher.py", self.package / "watch.py",
+                 *self.package.glob("bin/*")]
         before = {path: (path.read_bytes(), path.stat().st_mtime_ns) for path in paths}
         backups = list(self.state.iterdir())
         result = self.cli("--uninstall", "--dry-run")
@@ -113,7 +114,8 @@ class LauncherTests(unittest.TestCase):
         self.shell_rc.write_text("# user setup\nexport EDITOR=vi\n")
         self.shell_rc.chmod(0o640)
         self.install()
-        paths = [self.shell_rc, self.package / "launcher.py", *self.package.glob("bin/*")]
+        paths = [self.shell_rc, self.package / "launcher.py", self.package / "watch.py",
+                 *self.package.glob("bin/*")]
         before = {path: (path.read_bytes(), path.stat().st_mtime_ns) for path in paths}
         backups = list(self.state.iterdir())
         self.install()
@@ -186,11 +188,13 @@ class LauncherTests(unittest.TestCase):
         self.install("--uninstall", "--target", "codex")
         self.assertFalse((self.package / "bin/codex").exists())
         self.assertTrue((self.package / "bin/claude").exists())
+        self.assertTrue((self.package / "watch.py").exists())
         self.assertIn(installer.BEGIN, self.shell_rc.read_text())
         result = self.run_wrapper("claude", "--version")
         self.assertEqual(result.returncode, 0, result.stderr)
         self.install("--uninstall", "--target", "claude")
         self.assertFalse((self.package / "launcher.py").exists())
+        self.assertFalse((self.package / "watch.py").exists())
         self.assertNotIn(installer.BEGIN, self.shell_rc.read_text())
         self.assertEqual(unrelated.read_text(), "keep")
         before = list(self.state.iterdir())

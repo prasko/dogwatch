@@ -57,9 +57,8 @@ class DeploymentTests(unittest.TestCase):
             self.assertIn(f"# {role.title()}", profile["developer_instructions"])
             self.assertEqual(set(profile),
                              {"developer_instructions", "model", "model_reasoning_effort",
-                              "model_context_window", "model_auto_compact_token_limit"})
-            self.assertEqual(profile["model_context_window"], 872000)
-            self.assertEqual(profile["model_auto_compact_token_limit"], 400000)
+                              "model_auto_compact_token_limit"})
+            self.assertEqual(profile["model_auto_compact_token_limit"], 250000)
             self.assertEqual(set(agent), {"name", "description", "developer_instructions"})
             self.assertIn("| `fast` | gpt-6-luna | medium |", agent["developer_instructions"])
             self.assertIn("## Codex notes", profile["developer_instructions"])
@@ -85,6 +84,25 @@ class DeploymentTests(unittest.TestCase):
             self.assertIn("### Model tiers", body)
             self.assertIn("## Claude Code notes", body)
             self.assertNotIn("## Codex notes", body)
+
+    def test_provider_assistant_notes_are_scoped_to_assistant(self):
+        for target in deploy.TARGETS:
+            shared_notes = (deploy.ROOT / f"{target}/notes.md").read_text().strip()
+            assistant_notes = (deploy.ROOT / f"{target}/assistant.md").read_text().strip()
+            other = next(provider for provider in deploy.TARGETS if provider != target)
+            other_notes = (deploy.ROOT / f"{other}/assistant.md").read_text().strip()
+            for role in deploy.ROLES:
+                if target == "codex":
+                    contents = [tomllib.loads(self.rendered[target][path])["developer_instructions"]
+                                for path in (f"agents/dogwatch-{role}.toml",
+                                             f"dogwatch-{role}.config.toml")]
+                else:
+                    contents = [self.rendered[target][f"agents/dogwatch-{role}.md"]]
+                for content in contents:
+                    with self.subTest(target=target, role=role):
+                        self.assertIn(shared_notes, content)
+                        self.assertEqual(content.count(assistant_notes), int(role == "assistant"))
+                        self.assertNotIn(other_notes, content)
 
     def test_coordinators_receive_only_their_child_role_contracts(self):
         children = {"assistant": ("lead",),
@@ -148,21 +166,22 @@ class DeploymentTests(unittest.TestCase):
         config = root / "codex/roles.toml"
         original = config.read_text()
         config.write_text(original.replace(
-            "[roles.lead]\n", "[roles.lead]\nmodel_auto_compact_token_limit = 350000\n"))
+            "[roles.lead]\n", "[roles.lead]\nmodel_context_window = 300000\n"
+            "model_auto_compact_token_limit = 200000\n"))
         output = deploy.render(root, ("codex",))["codex"]
         lead = tomllib.loads(output["dogwatch-lead.config.toml"])
-        self.assertEqual(lead["model_context_window"], 872000)
-        self.assertEqual(lead["model_auto_compact_token_limit"], 350000)
+        self.assertEqual(lead["model_context_window"], 300000)
+        self.assertEqual(lead["model_auto_compact_token_limit"], 200000)
 
-        for value in ('"400000"', "true", "0", "-1", "400000.5"):
+        for value in ('"250000"', "true", "0", "-1", "250000.5"):
             with self.subTest(value=value):
                 config.write_text(original.replace(
-                    "model_auto_compact_token_limit = 400000",
+                    "model_auto_compact_token_limit = 250000",
                     f"model_auto_compact_token_limit = {value}"))
                 with self.assertRaisesRegex(ValueError, "positive integer"):
                     deploy.render(root, ("codex",))
         config.write_text(original.replace(
-            "[roles.lead]\n", "[roles.lead]\nmodel_context_window = 300000\n"))
+            "[roles.lead]\n", "[roles.lead]\nmodel_context_window = 200000\n"))
         with self.assertRaisesRegex(ValueError, "Compaction threshold"):
             deploy.render(root, ("codex",))
 

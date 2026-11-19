@@ -64,7 +64,7 @@ def package_changes(package, targets, *, uninstall=False, replace=False, migrati
                          if (package / "bin" / target).is_file()
                          and not is_managed((package / "bin" / target).read_bytes()))
     if not uninstall or not remaining:
-        relative_paths.append(Path("launcher.py"))
+        relative_paths.extend((Path("launcher.py"), Path("watch.py")))
     for relative in relative_paths:
         path = package / relative
         if any(part.is_symlink() for part in (path, *path.parents)):

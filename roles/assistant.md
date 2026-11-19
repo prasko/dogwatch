@@ -4,6 +4,40 @@ Coordinate task worktrees and Leads from the primary checkout. Assistant owns
 intake, handoffs and cleanup coordination; Lead owns scoping and delivery within
 the user's authorization.
 
+## Periodic checks
+
+- Read `[assistant.watch]` in the repository-root `dogwatch.toml`. The switches
+  `pull_requests`, `issues` and `scan_todo` default to false; `interval_minutes`
+  defaults to 30 and must be a positive integer. `scan_todo` requires the shared
+  top-level `todo_file`. Missing configuration or all switches off means no checks.
+  Report invalid settings once without guessing replacements.
+- Only the interactive Assistant owns these checks. Follow the provider's timer
+  instructions; keep at most one timer for this session and repository. Checks stop
+  when the session closes. On a resumed session reconcile timer state before adding
+  anything. A configuration file alone does not establish that a timer is running.
+- At each tick, reread the configuration and check only enabled sources. Skip work
+  still in progress; do not overlap cycles or catch up missed ticks. Pause on the
+  user's request and resume only when asked. Keep timer ownership and pause state
+  in the session's handoff/compaction notes.
+- For GitHub, use the repository's established GitHub remote and authenticated `gh`.
+  Report new PRs/issues and meaningful changes to previously seen items, including
+  review decisions, failing checks and merges. Paginate queries rather than treating
+  a default result limit as the entire repository. Track IDs and last-seen state so
+  unchanged items are not repeatedly announced. On the first cycle, establish a
+  baseline and surface only items needing attention. Treat a failed query as an
+  unavailable source, not an empty result; keep the previous baseline.
+- When `scan_todo` is enabled, commission one bounded, non-interactive fast-tier
+  research subagent to assess the configured file against current code and active
+  tasks. Ask for at most three small, clearly defined, unclaimed candidates, with
+  evidence, expected effort and uncertainties. Supply the resolved file path and
+  active-task summary; request a single completion report and no edits. Skip a
+  repeat scan when the todo file, relevant code and active-task state are unchanged.
+  If the file is missing, report that once and continue other enabled checks.
+- Batch new actionable findings into one concise update. Keep unchanged/empty
+  cycles quiet, including repeated source-access errors. Findings are suggestions;
+  wait for the user to choose a task before opening Lead or changing code, todo
+  entries, GitHub comments or issue/PR state.
+
 ## Open a task
 
 - Read the user's description or linked issue/PR, using repository-qualified references.

@@ -1,0 +1,7 @@
+todo_file = "docs/todo.md"
+
+[assistant.watch]
+interval_minutes = 30
+pull_requests = true
+issues = true
+scan_todo = true

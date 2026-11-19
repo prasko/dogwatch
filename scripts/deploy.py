@@ -142,6 +142,11 @@ def _instructions(root, role, target, tiers, resolved, skills):
         contracts = "\n".join(f"- **{name.title()}:** {resolved[name]['description']}"
                               for name in ROLE_CONTRACTS[role])
         texts.insert(-1, "## Delegated role contracts\n\n" + contracts)
+    if role == "assistant":
+        assistant_notes = (root / f"{target}/assistant.md").read_text().strip()
+        if not assistant_notes:
+            raise ValueError(f"Empty Assistant instructions ({target})")
+        texts.append(assistant_notes)
     return "\n\n".join(texts) + _tier_notes(target, tiers, resolved)
 
 

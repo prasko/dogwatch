@@ -6,6 +6,10 @@
   do not infer it from the role or session name. Clarify missing details with the
   caller when needed, while continuing work that does not depend on them.
 - Read applicable global and project agent instructions; the tool notes below say where.
+- Read the repository-root `dogwatch.toml` when present. Its optional top-level
+  `todo_file` is shared by every role and is relative to that root. Use it when the
+  task calls for consulting or updating the backlog; the setting alone does not
+  authorize changes. If absent, follow the repository's existing conventions.
 - Skills supply procedures without changing your role, edit boundaries or existing
   authorization. Use included procedures directly; load other skills only as needed.
 - Create worktrees at `~/Code/dogwatch/worktrees/{base_repo}/{worktree_name}`.
@@ -46,11 +50,15 @@
 - Assistant opens interactive Leads in task worktrees; it is a repository entry point.
 - Lead owns interactive specialist launches for its task. Other roles send requests
   for an interactive conversation to Lead.
-- Report to Lead or the commissioning agent at meaningful checkpoints: work ready
-  for review, review completed with findings addressed or outstanding, or assignment
-  complete. Batch routine edits and document updates into these summaries rather
-  than sending a message after each change. Escalate blockers, decisions needed and
-  material scope/design changes promptly; honor explicitly requested status updates.
+- Notify Lead or the commissioning agent only when a substantial checkpoint is
+  complete: an agreed deliverable is ready for review, a review or validation pass
+  is complete, or the assignment is finished. Short assignments normally need only
+  a completion report.
+- Do not send acknowledgements or progress messages after every turn, tool call or
+  edit. Batch routine findings and working notes into the next checkpoint report.
+  User-facing progress requirements do not imply notifications to Lead.
+- Escalate blockers requiring the parent's action, decisions needed and material
+  scope/design changes promptly; honor explicitly requested status updates.
 - Include conclusions, evidence, artifact paths, decisions and open questions in
   checkpoint reports.
   - When given a Herdr return address, send the reply with

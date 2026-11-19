@@ -5,6 +5,7 @@
 import json
 import os
 from pathlib import Path
+import subprocess
 import sys
 import tomllib
 
@@ -160,11 +161,46 @@ def launch_argv(agent, args, environ):
     return [real, *extra, *args]
 
 
+def assistant_watch(agent, args, environ):
+    """Start one timer only for an opted-in, local interactive Codex Assistant."""
+    for key in ("DOGWATCH_WATCH_PID", "DOGWATCH_WATCH_OWNER_PID"):
+        environ.pop(key, None)
+    if agent != "codex" or environ.get("HERDR_ENV") != "1":
+        return
+    command, options = codex_arguments(args)
+    keys = {key for key, _ in options}
+    profiles = [value for key, value in options if key in {"-p", "--profile"}]
+    if (not profiles or profiles[-1] != "dogwatch-assistant"
+            or command in CODEX_ADMIN_COMMANDS | {"exec", "e", "review"}
+            or keys & {"--help", "-h", "--version", "-V", "--remote"}):
+        return
+    from watch import project_root, read_watch, start_watch
+    try:
+        directories = [value for key, value in options if key in {"-C", "--cd"}]
+        directory = Path(directories[-1]).expanduser() if directories else Path.cwd()
+        root = project_root(directory)
+        settings = read_watch(root) if root else None
+        if settings is None:
+            return
+        if command in {"resume", "fork"} or "--worktree" in keys:
+            raise ValueError("resume, fork and --worktree can change the checkout; "
+                             "start a new Assistant in the intended checkout for periodic checks")
+        pane = environ.get("HERDR_PANE_ID")
+        if not pane:
+            raise ValueError("HERDR_PANE_ID is missing; open a fresh Herdr pane")
+        child = start_watch(root, pane, settings, environ)
+        environ["DOGWATCH_WATCH_PID"] = str(child)
+        environ["DOGWATCH_WATCH_OWNER_PID"] = str(os.getpid())
+    except (OSError, ValueError, subprocess.SubprocessError) as error:
+        print(f"Dogwatch periodic checks disabled: {error}", file=sys.stderr)
+
+
 def main():
     if len(sys.argv) < 2 or sys.argv[1] not in AGENTS:
         sys.exit("Usage: launcher.py codex|claude [arguments...]")
     try:
         argv = launch_argv(sys.argv[1], sys.argv[2:], os.environ)
+        assistant_watch(sys.argv[1], sys.argv[2:], os.environ)
         os.execv(argv[0], argv)
     except (ValueError, OSError) as error:
         sys.exit("Dogwatch launcher: " + str(error))

@@ -1,30 +1,26 @@
 # Codex models per tier: model and model_reasoning_effort (low, medium, high, xhigh, max).
 # Never use "ultra": it delegates on its own. Per-role tables can override a tier's settings.
-# Keep a large context ceiling but compact at 400k tokens.
+# Leave the context window at its default and compact at 250k tokens.
 
 [tiers.fast]
 model = "gpt-6-luna"
 model_reasoning_effort = "medium"
-model_context_window = 872000
-model_auto_compact_token_limit = 400000
+model_auto_compact_token_limit = 250000
 
 [tiers.standard]
 model = "gpt-6.1-sol"
 model_reasoning_effort = "high"
-model_context_window = 872000
-model_auto_compact_token_limit = 400000
+model_auto_compact_token_limit = 250000
 
 [tiers.deep]
 model = "gpt-6-astra"
 model_reasoning_effort = "high"
-model_context_window = 872000
-model_auto_compact_token_limit = 400000
+model_auto_compact_token_limit = 250000
 
 [tiers.special]
 model = "gpt-6-astra"
 model_reasoning_effort = "xhigh"
-model_context_window = 872000
-model_auto_compact_token_limit = 400000
+model_auto_compact_token_limit = 250000
 
 [roles.assistant]
 [roles.lead]
