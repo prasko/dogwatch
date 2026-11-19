@@ -8,17 +8,17 @@ model_reasoning_effort = "medium"
 model_auto_compact_token_limit = 250000
 
 [tiers.standard]
-model = "gpt-6.1-sol"
+model = "gpt-6.2-sol"
 model_reasoning_effort = "high"
 model_auto_compact_token_limit = 250000
 
 [tiers.deep]
-model = "gpt-6-astra"
+model = "gpt-6.2-astra"
 model_reasoning_effort = "high"
 model_auto_compact_token_limit = 250000
 
 [tiers.special]
-model = "gpt-6-astra"
+model = "gpt-6.2-astra"
 model_reasoning_effort = "xhigh"
 model_auto_compact_token_limit = 250000
 

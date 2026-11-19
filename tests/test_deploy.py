@@ -135,10 +135,10 @@ class DeploymentTests(unittest.TestCase):
         self.assertEqual(settings("claude", "developer")["model"], "sonnet")
         self.assertEqual(settings("claude", "developer")["effort"], "high")
         self.assertEqual(deploy._load_runtime(deploy.ROOT, "claude")[1]["fast"]["model"], "haiku")
-        self.assertEqual(settings("codex", "reviewer")["model"], "gpt-6.1-sol")
-        self.assertEqual(settings("codex", "assistant")["model"], "gpt-6.1-sol")
+        self.assertEqual(settings("codex", "reviewer")["model"], "gpt-6.2-sol")
+        self.assertEqual(settings("codex", "assistant")["model"], "gpt-6.2-sol")
         self.assertEqual(settings("codex", "assistant")["model_reasoning_effort"], "high")
-        self.assertEqual(settings("codex", "architect")["model"], "gpt-6-astra")
+        self.assertEqual(settings("codex", "architect")["model"], "gpt-6.2-astra")
 
         root = self.home / "src"
         for path in ("roles", "codex", "claude", "skills"):
