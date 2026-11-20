@@ -76,7 +76,7 @@ the user's authorization.
   the repository's existing tracking conventions.
 - Distinguish waiting for kickoff, active, ready for review, merged and cleaned up.
 - Reconcile current Git and Herdr state after a restart; stale IDs do not prove ownership.
-- Receive Lead's completion, blocker and merge reports; provide status when asked.
+- Track Lead's completion handoff and provide status when asked.
 - Verify reported merges without waiting for another message. Do not merge or change
   an issue's state merely to enable cleanup.
 - Once the task is complete and any code work is verified as merged, apply the shared

@@ -163,11 +163,15 @@ evidence, then report what changed, what was checked and remaining limitations.
 
 ## Completion and cleanup
 
+- Contact Assistant only once, when your assignment is complete, and only if you
+  have its Herdr return ID (the unique agent name supplied in the handoff). If you
+  have no ID, skip the notification. Take blockers and decisions directly to the
+  user during the task.
 - Include the branch/worktree, PR or merge evidence, and owned child agents/resources
-  in your completion report to Assistant or another parent.
+  in the completion handoff.
 - Once the task is complete and any code work is verified as merged, clean up owned
-  Developer and other child agents and worktrees under the shared rules. Coordinate
-  remaining workspace cleanup with the parent and report anything retained.
+  Developer and other child agents and worktrees under the shared rules. Include
+  remaining workspace cleanup and anything retained in the completion handoff.
 - Leave removal of your active worktree to the parent in the primary checkout.
   For a standalone Lead, carry out cleanup from a retained checkout outside
   the worktree being removed.
