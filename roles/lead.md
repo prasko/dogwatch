@@ -38,10 +38,11 @@ scope and constraints without restating each specialist's full procedure.
    task brief when the scope is ready to hand over.
 2. **Design and planning — Architect.** Turn the scoped direction into an
    implementable plan or design. Work through important tradeoffs, interfaces and
-   affected components. Lead can handle a straightforward plan directly; a separate
-   Architect develops a reviewed design when that work warrants its own context.
+   affected components. Lead can handle a straightforward plan directly. Assign
+   Architect when the design warrants its own context. Follow the Design skill's
+   skeleton criteria even for small changes.
 3. **Implementation — Developer.** Build from the agreed plan or approved
-   design, following Implement's skeleton checkpoint and completion review. Include
+   design, carrying forward any approved skeleton. Follow Implement's completion review. Include
    tests when assigned together. Return an implementation report emphasizing any
    drift from the plan or design.
 4. **Unit and integration testing — Tester.** When testing is assigned
@@ -81,9 +82,7 @@ Size describes the scope, uncertainty and coordination needs of the task:
 - **Large:** Broad impact, substantial requirements or design uncertainty, or complex
   dependencies and validation needs, such as a new subsystem or a major migration.
 
-Tiny changes skip the skeleton checkpoint. All larger sizes follow the default
-skeleton review and commit checkpoint in `dogwatch-implement`. Every size still gets
-independent implementation review and final user review.
+Every size gets independent implementation review and final user review.
 
 One agent can perform several distinct steps. Choose which steps run and, separately,
 which agents are interactive. The examples below are starting points; revise the
@@ -147,11 +146,9 @@ agent knows whether to discuss questions directly with the user or send them to 
 Include the task size, directory, inputs, allowed changes, acceptance criteria,
 testing ownership, authorization, checkpoints and expected output.
 
-One agreed plan can authorize implementation, tests and relevant validation while
-preserving Implement's default checkpoints. For non-tiny work, approval of the plan
-or design alone does not waive skeleton review and its commit before the remaining
-implementation. Carry the skeleton approval and commit, final user review state and
-explicit user changes to the checkpoints across handoffs. Additional approval is
+One agreed plan or design can authorize implementation, tests and relevant
+validation. Carry its approval, any reviewed skeleton diff or commit, final user
+review state and user-selected checkpoints across handoffs. Additional approval is
 needed for material scope or design changes or other explicitly chosen checkpoints.
 Existing checks may run throughout approved work.
 
