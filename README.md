@@ -155,7 +155,7 @@ cd /path/to/project && CLAUDE_CODE_AUTO_COMPACT_WINDOW=1000000 claude --agent do
 | Assistant | Open and track Leads in task worktrees; coordinate cleanup after merge. |
 | Lead | Choose the workflow, retain decisions and coordinate handoffs. |
 | Scoper | Investigate the problem and clarify requirements. |
-| Architect | Develop the approach, draft the code skeleton for structural changes, and obtain design review. |
+| Architect | Develop the approach and obtain design review. |
 | Developer | Implement the agreed change and assigned checks. |
 | Tester | Author and run separately assigned tests. |
 | Validator | Exercise acceptance scenarios on a throwaway instance. |
@@ -212,7 +212,8 @@ Existing approvals carry across handoffs, and you can change these defaults for 
 | Checkpoint | Stage | Applies to | Your part |
 | --- | --- | --- | --- |
 | Deciding on the scoping owner | Task kickoff, before scoping | Tasks needing scoping | Choose Lead or a dedicated Scoper. |
-| Design interview and approval | Design and planning | All changes, with depth scaled to the task | Agree on the direction with Lead or Architect. Review the design and skeleton together for new models, classes or modules, new or changed interfaces or schemas, and new or rerouted flows across files. For work within the existing structure and flow, approve the plan alone. |
+| Design interview and approval | Design and planning | All changes, with depth scaled to size | Work through open choices, tradeoffs and recommendations in an interview with Lead or Architect; review and approve the resulting plan or design. |
+| Skeleton approval | Early implementation, before the remaining behavior | Small, medium and large changes; tiny skips this | Review and approve the code skeleton. The builder then commits it before implementing the rest. |
 | Final implementation review | End of implementation | All implementation sizes | Review the finished work and remaining findings after cross-provider review, P0/P1 fixes and follow-up review. |
 
 Once a task is complete and its PR merge is verified, Lead coordinates cleanup of
