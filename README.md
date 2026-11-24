@@ -110,9 +110,7 @@ under `~/.local/state/dogwatch/`, with one timestamped directory and a `manifest
 recording original paths and modes per operation. `XDG_STATE_HOME` or `--state-home`
 changes this location. Unrelated configuration and project agents are preserved;
 generated paths refuse symlinks. Make role/skill edits here and redeploy, since updates replace
-local edits. Deployment migrates marked `agentic-` files and Codex's old unprefixed
-roles to the Dogwatch names, with backups. Retired Researcher files are also removed.
-Unmarked files at old paths are preserved.
+local edits.
 
 ## Use
 
@@ -266,12 +264,6 @@ replies through Herdr. This checks the installed workflow, including socket acce
 
 ## Update and remove
 
-To move older adjacent role/skill backups into the central backup directory, preview
-`python3 scripts/deploy.py --migrate-backups --dry-run`, then repeat without `--dry-run`.
-This moves only marked backups at known package paths; it does not redeploy roles or
-skills. Unmarked backups are left for manual review. The manifest also records each
-backup's `restore_to` path; restore files manually if needed.
-
 After updating this checkout, rerun launcher preview/apply and role deployment.
 Update provider CLIs through their installation method. Use `brew upgrade herdr`
 for Homebrew Herdr, or `herdr update` for a direct install. Re-run the integration
@@ -298,7 +290,7 @@ python3 scripts/deploy.py --uninstall --target codex --component roles --dry-run
 
 Roles include their interactive profiles. Skills can be used independently;
 removing skills while keeping roles produces a dependency warning. Removal backs
-up and deletes only marked files, including the old names, and keeps personal
+up and deletes only marked files and keeps personal
 agents, configuration and backups. Restore any desired backups manually. Installation
 and updates keep roles and skills together so their names and references stay in sync.
 If both providers share a home directory, changing shared skills requires `--target all`.
@@ -328,7 +320,7 @@ python3 scripts/deploy.py --check
 ```
 
 Tests use temporary homes and stub CLIs to cover role generation, launcher execution,
-provider/component selection, name migration, configuration preservation, backups,
+provider/component selection, configuration preservation, backups,
 repeat installation and removal. `deploy.py --check` compares installed roles and
 skills with repository sources. A full signed-in workflow on a clean Mac account
 still needs validation.
