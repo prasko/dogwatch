@@ -15,7 +15,7 @@ description = "Own scope investigation or requirements discussion; return findin
 tier = "deep"
 
 [architect]
-description = "Own design and its review; return a design document, decisions and approval state. May write design docs; cannot implement or edit production code or tests."
+description = "Own design and its review. May write design docs and edit source for an agreed design-stage sketch. Return decisions, artifacts and approval state. Leave implementation and tests to their owners."
 tier = "deep"
 
 [developer]

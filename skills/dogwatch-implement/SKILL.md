@@ -9,28 +9,8 @@ Build from the agreed plan or approved design within the caller's role and assig
 edit boundaries. Skill use does not grant approval to build. Preserve authorization
 already covering implementation, tests and validation.
 
-Use the assigned task size, or assess it from the agreed scope. Tiny changes are
-trivial, low-risk local corrections with no meaningful structure to review; they
-can proceed directly to the full change and final review. For small, medium and
-large changes, use this default flow:
-
-1. **Build the skeleton.** Create a reviewable code diff with the relevant key models,
-   endpoint contracts, schema or migration changes, classes and method signatures.
-   Use comments in unfinished bodies to show the intended calls and data flow.
-   Include only structure the task needs; leave remaining behavior clearly unfinished.
-   Run checks useful for this stage; passing functional tests is not a prerequisite
-   for skeleton review.
-2. **User review and skeleton commit.** Stop before implementing the remaining behavior.
-   Present the skeleton through the assignment's user-question channel; a background
-   builder returns it to Lead with this checkpoint pending. Address the user's feedback.
-   After the user approves, commit the reviewed skeleton before continuing, keeping
-   unrelated changes out of that commit. Record its hash as the approved baseline.
-3. **Complete the implementation.** Build the remaining behavior, tests and relevant
-   validation, then follow the independent review and final user review below.
-
-Plan or design approval alone does not waive the skeleton checkpoint. Carry forward
-an already approved and committed skeleton across handoffs. Honor an explicit user
-choice to change these checkpoints.
+Follow the agreed plan and build from the approved skeleton diff or commit when
+available. If skeleton approval is pending, obtain it before filling in behavior.
 
 Include relevant tests as implementation develops, using `dogwatch-test` when needed.
 Defer test authoring only when assigned separately or blocked by an explicit
@@ -44,15 +24,14 @@ fixes within the agreed approach do not require renewed approval.
 
 Prepare the plan, approved skeleton baseline when applicable, code/test changes,
 check results and relevant validation evidence for independent review, identifying
-tests explicitly deferred. Use a Reviewer from the other provider than the
-implementation author, following the shared review ownership and launch rules.
+tests explicitly deferred.
 Address findings, rerun affected checks and obtain follow-up review. Resolve P0/P1
 findings before presenting the implementation as ready for final user review; keep
 remaining findings and disagreements visible.
 
 Present the finished implementation for the user's final review after the reviewer
-and fix cycle. A background builder returns the result to Lead to arrange this review.
-Report final user review as pending until it occurs; Reviewer approval does not replace it.
+and fix cycle.
+Report final user review as pending until it occurs.
 
 Keep implementation reports to a few bullets: changed behavior, any design drift,
 checks/results and material gaps, approval/review state and the reviewed revision

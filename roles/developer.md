@@ -5,6 +5,10 @@ the included Test and Validate procedures when those activities are assigned.
 Normally work interactively so the user can discuss the implementation. Reserve
 non-interactive development for tiny, well-defined assignments.
 
+If asked to prepare a skeleton, use `dogwatch-prepare-skeleton` and obtain user
+approval before filling in behavior. When authorized, commit only the approved
+skeleton and record its hash.
+
 Include tests and runtime validation within the assignment's authorization. Honor
 separately assigned testing and explicit checkpoints. Raise material drift through
 Lead in the background or directly with the user in an interactive assignment.

@@ -23,7 +23,7 @@ for concise findings and evidence. Reuse completed work and valid approvals.
 
 ## Available steps
 
-For stages you own, load `dogwatch-scope`, `dogwatch-design`, `dogwatch-implement`,
+For stages you own, load `dogwatch-scope`, `dogwatch-design`, `dogwatch-prepare-skeleton`, `dogwatch-implement`,
 `dogwatch-test` or `dogwatch-validate` as needed. Skills do not change your model or
 authorize work. A scope/design-only request ends at that stage. Agree the approach
 before building, preserving any existing approval. The corresponding roles below
@@ -40,10 +40,28 @@ scope and constraints without restating each specialist's full procedure.
    implementable plan or design. Work through important tradeoffs, interfaces and
    affected components. Lead can handle a straightforward plan directly; a separate
    Architect develops a reviewed design when that work warrants its own context.
-3. **Implementation — Developer.** Build from the agreed plan or approved
-   design, following Implement's skeleton checkpoint and completion review. Include
-   tests when assigned together. Return an implementation report emphasizing any
-   drift from the plan or design.
+
+   At the end of the design interview, recommend whether the user should see a
+   code skeleton before implementation. If so, say who should prepare it and when.
+
+   - **Prepare a skeleton alongside the design.** For a single PR where a quick
+     sketch would clarify the approach, the design owner prepares it. The user
+     approves the design and sketch together. If the sketch grows, revisit the
+     PR split with the user while the diff is still a draft.
+   - **Prepare a skeleton when the PR starts.** Use this for a fuller outline
+     or work split across PRs. Developer prepares that PR's skeleton for user
+     approval before filling in behavior.
+   - **Skip the skeleton.** When the change or PR has little structure to review,
+     proceed from the approved plan.
+
+   If Architect owns the design, agree on the recommendation together. Whoever
+   conducts the interview asks the user to confirm it. For a background Architect
+   assignment, Lead asks.
+
+3. **Implementation — Developer.** Give Developer the agreed plan or design and
+   one instruction for this PR: prepare a skeleton for user approval, build from
+   the approved skeleton (include its diff or commit), or proceed without one.
+   Include tests when assigned together. Ask Developer to report any design drift.
 4. **Unit and integration testing — Tester.** When testing is assigned
    separately, select meaningful tests from requirements and risks, author and run
    them, obtain review and report results and gaps. Otherwise the implementation
@@ -81,8 +99,7 @@ Size describes the scope, uncertainty and coordination needs of the task:
 - **Large:** Broad impact, substantial requirements or design uncertainty, or complex
   dependencies and validation needs, such as a new subsystem or a major migration.
 
-Tiny changes skip the skeleton checkpoint. All larger sizes follow the default
-skeleton review and commit checkpoint in `dogwatch-implement`. Every size still gets
+Tiny changes normally skip the skeleton. Every size still gets
 independent implementation review and final user review.
 
 One agent can perform several distinct steps. Choose which steps run and, separately,
@@ -147,11 +164,11 @@ agent knows whether to discuss questions directly with the user or send them to 
 Include the task size, directory, inputs, allowed changes, acceptance criteria,
 testing ownership, authorization, checkpoints and expected output.
 
-One agreed plan can authorize implementation, tests and relevant validation while
-preserving Implement's default checkpoints. For non-tiny work, approval of the plan
-or design alone does not waive skeleton review and its commit before the remaining
-implementation. Carry the skeleton approval and commit, final user review state and
-explicit user changes to the checkpoints across handoffs. Additional approval is
+One agreed plan can authorize implementation, tests and relevant validation.
+Carry the skeleton decision, PR, owner and approval state across handoffs. When
+commits are authorized, have the author commit only the approved skeleton before
+implementation and record its hash. Otherwise carry the approved diff forward.
+Preserve the final user review state and any user changes to the checkpoints. Additional approval is
 needed for material scope or design changes or other explicitly chosen checkpoints.
 Existing checks may run throughout approved work.
 

@@ -259,6 +259,8 @@ class DeploymentTests(unittest.TestCase):
         self.assertFalse((self.destination / "agents").exists())
 
     def test_skills_are_portable_and_roles_embed_the_canonical_procedure(self):
+        for role in ("architect", "developer"):
+            self.assertIn("prepare-skeleton", deploy.ROLE_SKILLS[role])
         for skill in deploy.SKILLS:
             relative = f"skills/dogwatch-{skill}/SKILL.md"
             source = (deploy.ROOT / relative).read_text()

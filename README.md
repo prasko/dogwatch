@@ -99,7 +99,7 @@ python3 scripts/deploy.py --check
 
 Deployment creates Codex agents in `~/.codex/agents/dogwatch-<role>.toml` and
 interactive profiles in `~/.codex/dogwatch-<role>.config.toml`; Claude agents go in
-`~/.claude/agents/dogwatch-<role>.md`. Both receive eight `dogwatch-` workflow skills
+`~/.claude/agents/dogwatch-<role>.md`. Both receive the `dogwatch-` workflow skills
 in their tool home's `skills/` directory.
 `CODEX_HOME` / `--codex-home PATH` and `CLAUDE_CONFIG_DIR` / `--claude-home PATH`
 change these homes. Export custom homes in your shell so new Herdr panes use them too.
@@ -155,7 +155,7 @@ cd /path/to/project && CLAUDE_CODE_AUTO_COMPACT_WINDOW=1000000 claude --agent do
 | Assistant | Open and track Leads in task worktrees; coordinate cleanup after merge. |
 | Lead | Choose the workflow, retain decisions and coordinate handoffs. |
 | Scoper | Investigate the problem and clarify requirements. |
-| Architect | Develop the approach and obtain design review. |
+| Architect | Develop the approach, prepare an agreed design-stage sketch, and obtain design review. |
 | Developer | Implement the agreed change and assigned checks. |
 | Tester | Author and run separately assigned tests. |
 | Validator | Exercise acceptance scenarios on a throwaway instance. |
@@ -207,21 +207,31 @@ disabled or the session exits.
 
 ## Default user checkpoints
 
-Existing approvals carry across handoffs, and you can change these defaults for a task.
+This example follows a typical medium-sized change delivered in one PR, such as
+adding an endpoint that stores a new model. A code skeleton is a diff showing
+the proposed models, key classes and functions, and how they fit together before
+their behavior is filled in.
 
-| Checkpoint | Stage | Applies to | Your part |
-| --- | --- | --- | --- |
-| Deciding on the scoping owner | Task kickoff, before scoping | Tasks needing scoping | Choose Lead or a dedicated Scoper. |
-| Design interview and approval | Design and planning | All changes, with depth scaled to size | Work through open choices, tradeoffs and recommendations in an interview with Lead or Architect; review and approve the resulting plan or design. |
-| Skeleton approval | Early implementation, before the remaining behavior | Small, medium and large changes; tiny skips this | Review and approve the code skeleton. The builder then commits it before implementing the rest. |
-| Final implementation review | End of implementation | All implementation sizes | Review the finished work and remaining findings after cross-provider review, P0/P1 fixes and follow-up review. |
+| Stage | Checkpoint | Your part |
+| --- | --- | --- |
+| Task kickoff | Choose who scopes the change | Choose Lead or a dedicated Scoper. |
+| End of the design interview | Decide whether to prepare a skeleton and who will build it | Confirm the design owner's recommendation. In this example, Developer will prepare it. |
+| When the design is ready | Approve the design | Review the requirements and proposed approach. |
+| Start of implementation | Approve the skeleton | Review Developer's first diff before they fill in the behavior. |
+| After independent review and fixes | Review the implementation | Review the finished change and any remaining findings. |
+
+A quick skeleton can be part of the design review when seeing the code would
+help you judge a single-PR change. Review a fuller skeleton at the start of
+implementation, as in the example. For a multi-PR change, review each PR's
+skeleton during implementation. Developer prepares it when work on that PR starts.
 
 Once a task is complete and its PR merge is verified, Lead coordinates cleanup of
 task-owned agents and worktrees by default, retaining anything still needed.
 Lead or other agents may ask for additional decisions or permissions along the way
 when something is unclear.
 
-See [task sizes](roles/lead.md#task-sizes), the [Design](skills/dogwatch-design/SKILL.md)
+See [task sizes](roles/lead.md#task-sizes), the [Design](skills/dogwatch-design/SKILL.md),
+[Prepare skeleton](skills/dogwatch-prepare-skeleton/SKILL.md)
 and [Implement](skills/dogwatch-implement/SKILL.md) procedures, and the
 [cleanup rules](roles/common.md#task-cleanup) for details.
 
