@@ -9,12 +9,9 @@ Start from the scope, existing findings and approved decisions. Resolve choices
 that affect the solution: interfaces, data flow, dependencies, failure behavior,
 migration needs and meaningful tradeoffs. Include only those relevant to the task.
 
-Discuss the direction with the user. Ask one decision question at a time, explain
-the tradeoff and your recommendation, and wait for the answer before the next
-dependent decision.
-For substantial work, keep dated working notes at the established location.
-Record decisions and their rationale in order as they happen, including revisions.
-Save each decision before the next question and track open choices.
+Settle these choices with the user using `dogwatch-interview`. For substantial work,
+keep dated decision notes at the established location, in the order decisions are
+made, and track open choices there.
 
 ## Write the plan or design
 

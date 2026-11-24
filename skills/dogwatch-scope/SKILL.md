@@ -9,9 +9,8 @@ Establish the problem, current behavior, desired outcome, constraints, exclusion
 and observable acceptance criteria. Build on existing findings and user decisions.
 Delegate bounded factual research when useful; interpret the evidence yourself.
 
-Separate requirements from possible solutions. Suggest a direction and meaningful
-tradeoffs without committing to a detailed design. Ask focused questions where the
-answer changes scope or direction; distinguish assumptions from confirmed decisions.
+Separate requirements from possible solutions. Suggest a direction, leaving solution
+choices to design. Clarify requirements with the user using `dogwatch-interview`.
 
 For a bounded investigation, return findings, evidence and unresolved questions.
 Do not require a complete brief to finish it. For a complete scope, include the

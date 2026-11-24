@@ -18,9 +18,10 @@ CLAUDE_MARKER = "---\n" + MARKER
 ROLES = ("assistant", "lead", "scoper", "architect", "developer", "tester", "validator", "reviewer")
 ROLE_CONTRACTS = {"assistant": ("lead",),
                   "lead": tuple(role for role in ROLES if role not in ("assistant", "lead"))}
-SKILLS = ("scope", "design", "prepare-skeleton", "implement", "test", "validate", "research",
-          "setup-feedback", "write-doc", "cleanup")
-ROLE_SKILLS = {"assistant": ("cleanup",), "scoper": ("scope",), "architect": ("design",),
+SKILLS = ("scope", "design", "interview", "prepare-skeleton", "implement", "test", "validate",
+          "research", "setup-feedback", "write-doc", "cleanup")
+ROLE_SKILLS = {"assistant": ("cleanup",), "scoper": ("scope", "interview"),
+               "architect": ("design", "interview"),
                "developer": ("implement", "prepare-skeleton", "test", "validate"),
                "tester": ("test",), "validator": ("validate",)}
 TARGETS = ("codex", "claude")
