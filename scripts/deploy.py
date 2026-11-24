@@ -23,8 +23,8 @@ ROLES = ("assistant", *LEGACY_ROLES)
 ROLE_CONTRACTS = {"assistant": ("lead",),
                   "lead": tuple(role for role in ROLES if role not in ("assistant", "lead"))}
 SKILLS = ("scope", "design", "prepare-skeleton", "implement", "test", "validate", "research",
-          "setup-feedback", "write-doc")
-ROLE_SKILLS = {"scoper": ("scope",), "architect": ("design",),
+          "setup-feedback", "write-doc", "cleanup")
+ROLE_SKILLS = {"assistant": ("cleanup",), "scoper": ("scope",), "architect": ("design",),
                "developer": ("implement", "prepare-skeleton", "test", "validate"),
                "tester": ("test",), "validator": ("validate",)}
 RETIRED = {"codex": ("agents/researcher.toml", "agentic-researcher.config.toml"),

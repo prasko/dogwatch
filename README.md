@@ -231,7 +231,7 @@ when something is unclear.
 See [task sizes](roles/lead.md#task-sizes), the [Design](skills/dogwatch-design/SKILL.md),
 [Prepare skeleton](skills/dogwatch-prepare-skeleton/SKILL.md)
 and [Implement](skills/dogwatch-implement/SKILL.md) procedures, and the
-[cleanup rules](roles/common.md#task-cleanup) for details.
+[cleanup rules](skills/dogwatch-cleanup/SKILL.md) for details.
 
 ## Preferences and compatibility
 
@@ -314,7 +314,7 @@ method if no longer needed. Keep provider credentials and other configuration.
 
 Shared role contracts live in `roles/`; reusable procedures live in `skills/`.
 Lead loads skills as needed, while deployment embeds their bodies into specialist
-roles. `roles/common.md` applies to every role; each tool's `notes.md` and
+roles and Assistant. `roles/common.md` applies to every role; each tool's `notes.md` and
 `roles.toml` add tool-specific behavior and model tiers. Each tool's `assistant.md`
 adds timer instructions only to Assistant. There are no automatic
 workflow review gates; agents commission reviews according to their roles.

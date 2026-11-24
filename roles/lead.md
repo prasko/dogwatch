@@ -170,7 +170,7 @@ evidence, then report what changed, what was checked and remaining limitations.
 - Include branches/worktrees, PRs or merge evidence, and owned child agents/resources
   in the completion handoff.
 - Once the task is complete and any code work is verified as merged, clean up owned
-  Developer and other child agents and worktrees under the shared rules. Include
+  Developer and other child agents and worktrees using `dogwatch-cleanup`. Include
   remaining workspace cleanup and anything retained in the completion handoff.
 - Leave removal of your active worktree to the parent in the primary checkout.
   For a standalone Lead, carry out cleanup from a retained checkout outside
