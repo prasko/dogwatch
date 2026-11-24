@@ -10,7 +10,9 @@ requested. Show the proposed models and their defining fields, key classes and
 functions, and the signatures or calls that explain how they fit together.
 
 Include supporting interfaces, schema changes or additional call sites where
-they help the reader trace the proposed flow. Leave behavior unfinished. Use a
+they help the reader trace the proposed flow. Leave new behavior unfinished. Keep
+existing implementations intact even when they will change; mark each change site
+with a short TODO rather than replacing working code with a placeholder. Use a
 short comment where a signature alone would leave the flow unclear.
 
 If the structure outgrows the requested scope, show the partial diff before
