@@ -15,12 +15,12 @@ description = "Own scope investigation or requirements discussion; return findin
 tier = "deep"
 
 [architect]
-description = "Own design and its review. May write design docs and edit source for an agreed design-stage sketch. Return decisions, artifacts and approval state. Leave implementation and tests to their owners."
+description = "Own the high-level design, its PR plan and design review. May write design docs, not source or tests. Return decisions, artifacts and approval state."
 tier = "deep"
 
 [developer]
-description = "Own implementation within the agreed plan; may edit production code and assigned tests and fixtures. Return changes, check results, design drift and review state."
-tier = "standard"
+description = "Own implementation within the agreed plan, starting each PR from a skeleton for user approval; may edit production code and assigned tests and fixtures. Return changes, check results, design drift and review state."
+tier = "deep"
 
 [tester]
 description = "Own separately assigned unit and integration testing; may edit tests and test fixtures, not production code. Return coverage, results and gaps; route production defects to the implementation owner."

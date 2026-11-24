@@ -9,8 +9,18 @@ Build from the agreed plan or approved design within the caller's role and assig
 edit boundaries. Skill use does not grant approval to build. Preserve authorization
 already covering implementation, tests and validation.
 
-Follow the agreed plan and build from the approved skeleton diff or commit when
-available. If skeleton approval is pending, obtain it before filling in behavior.
+Start each PR with a skeleton unless the change is tiny or the assignment skips it:
+
+1. Prepare it with `dogwatch-prepare-skeleton`. Add a short implementation doc only
+   when the skeleton alone leaves the approach unclear or the user asks.
+2. Stop before filling in behavior and obtain the user's approval through the
+   user-question channel; a background builder returns it to Lead with this
+   checkpoint pending. When commits are authorized, commit only the approved
+   skeleton and record its hash as the baseline; otherwise keep the approved diff.
+3. Build the remaining behavior, tests and relevant validation.
+
+Build from an already approved skeleton when one is supplied. Design approval alone
+does not waive the skeleton checkpoint.
 
 Include relevant tests as implementation develops, using `dogwatch-test` when needed.
 Defer test authoring only when assigned separately or blocked by an explicit
@@ -38,6 +48,6 @@ checks/results and material gaps, approval/review state and the reviewed revisio
 or working-tree state. Link to evidence and code instead of narrating edits.
 Reporting does not require a separate document.
 
-For requested implementation documents, use `dogwatch-write-doc`. Include a short
+For implementation documents, use `dogwatch-write-doc`. Include a short
 list of key models, services or files and their role in the change when useful;
 avoid an exhaustive inventory or repeating what the code already explains.

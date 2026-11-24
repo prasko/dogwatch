@@ -36,32 +36,16 @@ scope and constraints without restating each specialist's full procedure.
    outcome, constraints and acceptance criteria. Investigate options and open
    questions from the user's initial request. Return findings for discussion or a
    task brief when the scope is ready to hand over.
-2. **Design and planning — Architect.** Turn the scoped direction into an
-   implementable plan or design. Work through important tradeoffs, interfaces and
+2. **Design and planning — Architect.** Turn the scoped direction into a high-level
+   plan or design with a PR plan. Work through important tradeoffs, interfaces and
    affected components. Lead can handle a straightforward plan directly; a separate
    Architect develops a reviewed design when that work warrants its own context.
-
-   At the end of the design interview, recommend whether the user should see a
-   code skeleton before implementation. If so, say who should prepare it and when.
-
-   - **Prepare a skeleton alongside the design.** For a single PR where a quick
-     sketch would clarify the approach, the design owner prepares it. The user
-     approves the design and sketch together. If the sketch grows, revisit the
-     PR split with the user while the diff is still a draft.
-   - **Prepare a skeleton when the PR starts.** Use this for a fuller outline
-     or work split across PRs. Developer prepares that PR's skeleton for user
-     approval before filling in behavior.
-   - **Skip the skeleton.** When the change or PR has little structure to review,
-     proceed from the approved plan.
-
-   If Architect owns the design, agree on the recommendation together. Whoever
-   conducts the interview asks the user to confirm it. For a background Architect
-   assignment, Lead asks.
-
-3. **Implementation — Developer.** Give Developer the agreed plan or design and
-   one instruction for this PR: prepare a skeleton for user approval, build from
-   the approved skeleton (include its diff or commit), or proceed without one.
-   Include tests when assigned together. Ask Developer to report any design drift.
+3. **Implementation — Developer.** Give each Developer the agreed design and its PR
+   from the plan. Each PR starts with a skeleton for user approval unless the change
+   is tiny or the user agrees to skip it; state which in the assignment, and supply
+   an already approved skeleton's diff or commit. Run PRs in sequence or in parallel
+   as the plan allows, giving each parallel PR its own branch and worktree. Include
+   tests when assigned together. Ask Developer to report any design drift.
 4. **Unit and integration testing — Tester.** When testing is assigned
    separately, select meaningful tests from requirements and risks, author and run
    them, obtain review and report results and gaps. Otherwise the implementation
@@ -99,8 +83,7 @@ Size describes the scope, uncertainty and coordination needs of the task:
 - **Large:** Broad impact, substantial requirements or design uncertainty, or complex
   dependencies and validation needs, such as a new subsystem or a major migration.
 
-Tiny changes normally skip the skeleton. Every size still gets
-independent implementation review and final user review.
+Every size gets independent implementation review and final user review.
 
 One agent can perform several distinct steps. Choose which steps run and, separately,
 which agents are interactive. The examples below are starting points; revise the
@@ -133,8 +116,8 @@ needs become clear.
 
 ## Model tiers
 
-Each role runs on a default tier: `deep` for Lead, Scoper and Architect; `standard`
-for Assistant, Developer, Tester, Validator and Reviewer; `fast` for generic research workers. The tool notes
+Each role runs on a default tier: `deep` for Lead, Scoper, Architect and Developer;
+`standard` for Assistant, Tester, Validator and Reviewer; `fast` for generic research workers. The tool notes
 map tiers to models and give the override syntax. Override per assignment and state
 the tier and reason in it:
 
@@ -165,9 +148,7 @@ Include the task size, directory, inputs, allowed changes, acceptance criteria,
 testing ownership, authorization, checkpoints and expected output.
 
 One agreed plan can authorize implementation, tests and relevant validation.
-Carry the skeleton decision, PR, owner and approval state across handoffs. When
-commits are authorized, have the author commit only the approved skeleton before
-implementation and record its hash. Otherwise carry the approved diff forward.
+Carry each PR's skeleton and approval state across handoffs.
 Preserve the final user review state and any user changes to the checkpoints. Additional approval is
 needed for material scope or design changes or other explicitly chosen checkpoints.
 Existing checks may run throughout approved work.
@@ -184,7 +165,9 @@ evidence, then report what changed, what was checked and remaining limitations.
   have its Herdr return ID (the unique agent name supplied in the handoff). If you
   have no ID, skip the notification. Take blockers and decisions directly to the
   user during the task.
-- Include the branch/worktree, PR or merge evidence, and owned child agents/resources
+- With a PR plan, the task is complete once every planned PR is merged or explicitly
+  dropped.
+- Include branches/worktrees, PRs or merge evidence, and owned child agents/resources
   in the completion handoff.
 - Once the task is complete and any code work is verified as merged, clean up owned
   Developer and other child agents and worktrees under the shared rules. Include

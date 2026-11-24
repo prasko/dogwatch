@@ -19,21 +19,24 @@ Save each decision before the next question and track open choices.
 ## Write the plan or design
 
 For a small change, keep the written plan to the affected components and checks.
-For substantial work, draft the design as a whole after the interview. Put a
-one-line link to the decision notes directly below the title, before these sections:
+For substantial work, draft the design as a whole after the interview. Keep it high
+level: components, responsibilities, data flow and key decisions. Leave classes,
+signatures, fields and file-level changes to each PR's skeleton. Put a one-line
+link to the decision notes directly below the title, before these sections:
 
 - **Objective** states the goal in one or two sentences.
 - **Requirements** describes the current state, the intended behavior and any
   constraints the implementation must preserve.
-- **Design** explains how the pieces work together. Use subsections named for the
-  concerns that matter to this change. Identify the components involved and
-  describe important behavior such as recovery after a partial failure.
+- **Design** explains how the components work together, with subsections for the
+  concerns that matter, such as recovery after a partial failure.
+- **PR plan** lists the PRs in order, each independently reviewable and mergeable,
+  with dependencies and what each provides to later PRs. It may propose sequential
+  or parallel work; Lead orchestrates it. A single-PR change says so in one line.
 - **Other considerations** covers relevant limitations, deferred work or follow-ups
   when they exist.
 
-Keep the requirements and design sufficient to implement the change. The linked
-notes provide the history behind those choices. Follow `dogwatch-write-doc` and
-honor the user's requested depth or drafting process.
+The linked notes provide the history behind those choices. Follow `dogwatch-write-doc`
+and honor the user's requested depth or drafting process.
 
 ## Review and handoff
 

@@ -155,8 +155,8 @@ cd /path/to/project && CLAUDE_CODE_AUTO_COMPACT_WINDOW=1000000 claude --agent do
 | Assistant | Open and track Leads in task worktrees; coordinate cleanup after merge. |
 | Lead | Choose the workflow, retain decisions and coordinate handoffs. |
 | Scoper | Investigate the problem and clarify requirements. |
-| Architect | Develop the approach, prepare an agreed design-stage sketch, and obtain design review. |
-| Developer | Implement the agreed change and assigned checks. |
+| Architect | Develop the high-level design and PR plan, and obtain design review. |
+| Developer | Implement each PR from an approved skeleton, with assigned checks. |
 | Tester | Author and run separately assigned tests. |
 | Validator | Exercise acceptance scenarios on a throwaway instance. |
 | Reviewer | Independently assess the assigned artifact. |
@@ -215,15 +215,13 @@ their behavior is filled in.
 | Stage | Checkpoint | Your part |
 | --- | --- | --- |
 | Task kickoff | Choose who scopes the change | Choose Lead or a dedicated Scoper. |
-| End of the design interview | Decide whether to prepare a skeleton and who will build it | Confirm the design owner's recommendation. In this example, Developer will prepare it. |
-| When the design is ready | Approve the design | Review the requirements and proposed approach. |
-| Start of implementation | Approve the skeleton | Review Developer's first diff before they fill in the behavior. |
+| When the design is ready | Approve the design | Review the requirements, high-level approach and PR plan. |
+| Start of each PR | Approve the skeleton | Review Developer's first diff before they fill in the behavior. |
 | After independent review and fixes | Review the implementation | Review the finished change and any remaining findings. |
 
-A quick skeleton can be part of the design review when seeing the code would
-help you judge a single-PR change. Review a fuller skeleton at the start of
-implementation, as in the example. For a multi-PR change, review each PR's
-skeleton during implementation. Developer prepares it when work on that PR starts.
+The design stays high level; code structure is reviewed in the skeleton. Tiny
+changes skip the skeleton. For a multi-PR change, Lead runs the planned PRs in
+sequence or in parallel, and each starts with its own skeleton.
 
 Once a task is complete and its PR merge is verified, Lead coordinates cleanup of
 task-owned agents and worktrees by default, retaining anything still needed.

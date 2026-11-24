@@ -132,8 +132,9 @@ class DeploymentTests(unittest.TestCase):
         self.assertEqual(settings("claude", "lead")["model"], "opus")
         self.assertEqual(settings("claude", "assistant")["model"], "sonnet")
         self.assertEqual(settings("claude", "assistant")["effort"], "high")
-        self.assertEqual(settings("claude", "developer")["model"], "sonnet")
-        self.assertEqual(settings("claude", "developer")["effort"], "high")
+        self.assertEqual(settings("claude", "developer")["model"], "opus")
+        self.assertEqual(settings("claude", "developer")["effort"], "medium")
+        self.assertEqual(settings("claude", "tester")["model"], "sonnet")
         self.assertEqual(deploy._load_runtime(deploy.ROOT, "claude")[1]["fast"]["model"], "haiku")
         self.assertEqual(settings("codex", "reviewer")["model"], "gpt-6.2-sol")
         self.assertEqual(settings("codex", "assistant")["model"], "gpt-6.2-sol")
@@ -259,8 +260,8 @@ class DeploymentTests(unittest.TestCase):
         self.assertFalse((self.destination / "agents").exists())
 
     def test_skills_are_portable_and_roles_embed_the_canonical_procedure(self):
-        for role in ("architect", "developer"):
-            self.assertIn("prepare-skeleton", deploy.ROLE_SKILLS[role])
+        self.assertIn("prepare-skeleton", deploy.ROLE_SKILLS["developer"])
+        self.assertNotIn("prepare-skeleton", deploy.ROLE_SKILLS["architect"])
         for skill in deploy.SKILLS:
             relative = f"skills/dogwatch-{skill}/SKILL.md"
             source = (deploy.ROOT / relative).read_text()
