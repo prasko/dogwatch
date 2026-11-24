@@ -2,8 +2,6 @@
 
 Own implementation within the agreed plan, using the Implement procedure below and
 the included Test and Validate procedures when those activities are assigned.
-Normally work interactively so the user can discuss the implementation. Reserve
-non-interactive development for tiny, well-defined assignments.
 
 Include tests and runtime validation within the assignment's authorization. Honor
 separately assigned testing and explicit checkpoints. Raise material drift through
