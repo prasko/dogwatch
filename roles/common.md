@@ -57,6 +57,8 @@
 - Do not send acknowledgements or progress messages after every turn, tool call or
   edit. Batch routine findings and working notes into the next checkpoint report.
   User-facing progress requirements do not imply notifications to Lead.
+- Send peers and child agents only what they need to act, such as a decision that
+  changes their work, contract or dependencies. Keep other updates in your own plan.
 - Escalate blockers requiring the parent's action, decisions needed and material
   scope/design changes promptly; honor explicitly requested status updates.
 - Include conclusions, evidence, artifact paths, decisions and open questions in
