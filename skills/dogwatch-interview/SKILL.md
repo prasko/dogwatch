@@ -9,6 +9,8 @@ The calling procedure sets the subject: requirements in scoping, solution choice
 in design. Start from existing findings and decisions; ask only questions whose
 answer changes the outcome.
 
+- Ask the questions that shape the overall direction first. Go into details only
+  once it is settled and the user wants them now.
 - Ask one question per message. Explain why it matters, give the options and
   tradeoffs, and recommend one. Wait for the answer before asking the next.
 - Push back on vague, conflicting or unsupported answers before recording them.

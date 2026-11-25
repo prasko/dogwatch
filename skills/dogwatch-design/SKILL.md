@@ -5,9 +5,11 @@ description: "Turn software requirements into an implementable approach, from a 
 
 # Design
 
-Start from the scope, existing findings and approved decisions. Resolve choices
-that affect the solution: interfaces, data flow, dependencies, failure behavior,
-migration needs and meaningful tradeoffs. Include only those relevant to the task.
+Start from the scope, existing findings and approved decisions. Settle the big
+picture first: the overall approach, component boundaries and the few decisions
+that shape the PR plan. Then ask whether the user wants to go into details such
+as failure behavior or migration now; otherwise record them as open or leave
+them to the PR skeletons.
 
 Settle these choices with the user using `dogwatch-interview`. For substantial work,
 keep dated decision notes at the established location, in the order decisions are
